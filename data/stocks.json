@@ -1,0 +1,733 @@
+{
+  "updated_at": "2026-06-21T04:23:12.064Z",
+  "today": "2026-06-21",
+  "count": 12,
+  "stocks": [
+    {
+      "ticker": "2882",
+      "name": "國泰金",
+      "sector": "金融",
+      "spotPrice": 112.5,
+      "futuresPrice": 111.8,
+      "cashDividend": 3.5,
+      "exDate": "2026-06-30",
+      "futuresVolume": 2840,
+      "marginTier": "A",
+      "expectedDeclinePct": 1.2,
+      "targetHoldDays": 5,
+      "etfs": [
+        {
+          "id": "0056",
+          "name": "元大高股息",
+          "weight": 4.82
+        },
+        {
+          "id": "00878",
+          "name": "國泰永續高股息",
+          "weight": 5.31
+        },
+        {
+          "id": "00919",
+          "name": "群益台灣精選高息",
+          "weight": 4.95
+        },
+        {
+          "id": "00713",
+          "name": "元大台灣高息低波",
+          "weight": 3.21
+        }
+      ],
+      "history": [
+        {
+          "year": 2025,
+          "pnl": 480,
+          "win": true
+        },
+        {
+          "year": 2024,
+          "pnl": 920,
+          "win": true
+        },
+        {
+          "year": 2023,
+          "pnl": -280,
+          "win": false
+        },
+        {
+          "year": 2022,
+          "pnl": -820,
+          "win": false
+        },
+        {
+          "year": 2021,
+          "pnl": 1240,
+          "win": true
+        }
+      ],
+      "fillDays": [
+        8,
+        14,
+        11
+      ]
+    },
+    {
+      "ticker": "2317",
+      "name": "鴻海",
+      "sector": "電子代工",
+      "spotPrice": 270.5,
+      "futuresPrice": 268.8,
+      "cashDividend": 7.2,
+      "exDate": "2026-07-02",
+      "futuresVolume": 6240,
+      "marginTier": "A",
+      "expectedDeclinePct": 2.5,
+      "targetHoldDays": 8,
+      "etfs": [
+        {
+          "id": "0056",
+          "name": "元大高股息",
+          "weight": 6.92
+        },
+        {
+          "id": "00878",
+          "name": "國泰永續高股息",
+          "weight": 5.45
+        },
+        {
+          "id": "00919",
+          "name": "群益台灣精選高息",
+          "weight": 5.1
+        },
+        {
+          "id": "00929",
+          "name": "復華台灣科技優息",
+          "weight": 7.3
+        }
+      ],
+      "history": [
+        {
+          "year": 2025,
+          "pnl": 9280,
+          "win": true
+        },
+        {
+          "year": 2024,
+          "pnl": 7520,
+          "win": true
+        },
+        {
+          "year": 2023,
+          "pnl": 8840,
+          "win": true
+        },
+        {
+          "year": 2022,
+          "pnl": -2240,
+          "win": false
+        },
+        {
+          "year": 2021,
+          "pnl": 4920,
+          "win": true
+        }
+      ],
+      "fillDays": [
+        18,
+        24,
+        22
+      ]
+    },
+    {
+      "ticker": "2357",
+      "name": "華碩",
+      "sector": "電腦週邊",
+      "spotPrice": 580,
+      "futuresPrice": 574.5,
+      "cashDividend": 42,
+      "exDate": "2026-07-01",
+      "futuresVolume": 1820,
+      "marginTier": "A",
+      "expectedDeclinePct": 3.2,
+      "targetHoldDays": 10,
+      "etfs": [
+        {
+          "id": "0056",
+          "name": "元大高股息",
+          "weight": 5.42
+        },
+        {
+          "id": "00878",
+          "name": "國泰永續高股息",
+          "weight": 4.18
+        },
+        {
+          "id": "00919",
+          "name": "群益台灣精選高息",
+          "weight": 6.31
+        },
+        {
+          "id": "00929",
+          "name": "復華台灣科技優息",
+          "weight": 4.85
+        }
+      ],
+      "history": [
+        {
+          "year": 2025,
+          "pnl": 18420,
+          "win": true
+        },
+        {
+          "year": 2024,
+          "pnl": 14280,
+          "win": true
+        },
+        {
+          "year": 2023,
+          "pnl": -2820,
+          "win": false
+        },
+        {
+          "year": 2022,
+          "pnl": 22640,
+          "win": true
+        },
+        {
+          "year": 2021,
+          "pnl": 8240,
+          "win": true
+        }
+      ],
+      "fillDays": [
+        14,
+        6,
+        57
+      ]
+    },
+    {
+      "ticker": "3264",
+      "name": "欣銓",
+      "sector": "半導體封測",
+      "spotPrice": 232.5,
+      "futuresPrice": 230.5,
+      "cashDividend": 4.2,
+      "exDate": "2026-06-30",
+      "futuresVolume": 680,
+      "marginTier": "B",
+      "expectedDeclinePct": 2.5,
+      "targetHoldDays": 8,
+      "etfs": [
+        {
+          "id": "00936",
+          "name": "台新永續高息中小",
+          "weight": 3.21
+        }
+      ],
+      "history": [
+        {
+          "year": 2025,
+          "pnl": 1280,
+          "win": true
+        },
+        {
+          "year": 2024,
+          "pnl": 9840,
+          "win": true
+        },
+        {
+          "year": 2023,
+          "pnl": -3820,
+          "win": false
+        },
+        {
+          "year": 2022,
+          "pnl": 8240,
+          "win": true
+        },
+        {
+          "year": 2021,
+          "pnl": 2820,
+          "win": true
+        }
+      ],
+      "fillDays": [
+        56,
+        1,
+        1
+      ]
+    },
+    {
+      "ticker": "5347",
+      "name": "世界",
+      "sector": "半導體晶圓代工",
+      "spotPrice": 146,
+      "futuresPrice": 144.5,
+      "cashDividend": 4.5,
+      "exDate": "2026-07-06",
+      "futuresVolume": 1240,
+      "marginTier": "A",
+      "expectedDeclinePct": 6.5,
+      "targetHoldDays": 15,
+      "etfs": [
+        {
+          "id": "00929",
+          "name": "復華台灣科技優息",
+          "weight": 5.42
+        },
+        {
+          "id": "00919",
+          "name": "群益台灣精選高息",
+          "weight": 3.18
+        }
+      ],
+      "history": [
+        {
+          "year": 2025,
+          "pnl": 14820,
+          "win": true
+        },
+        {
+          "year": 2024,
+          "pnl": 18320,
+          "win": true
+        },
+        {
+          "year": 2023,
+          "pnl": 22640,
+          "win": true
+        },
+        {
+          "year": 2022,
+          "pnl": 25240,
+          "win": true
+        },
+        {
+          "year": 2021,
+          "pnl": -2280,
+          "win": false
+        }
+      ],
+      "fillDays": [
+        null,
+        null,
+        58
+      ]
+    },
+    {
+      "ticker": "3231",
+      "name": "緯創",
+      "sector": "電子代工",
+      "spotPrice": 156,
+      "futuresPrice": 155,
+      "cashDividend": 5.5,
+      "exDate": "2026-07-08",
+      "futuresVolume": 5840,
+      "marginTier": "A",
+      "expectedDeclinePct": 1,
+      "targetHoldDays": 5,
+      "etfs": [
+        {
+          "id": "0056",
+          "name": "元大高股息",
+          "weight": 4.51
+        },
+        {
+          "id": "00878",
+          "name": "國泰永續高股息",
+          "weight": 3.92
+        },
+        {
+          "id": "00929",
+          "name": "復華台灣科技優息",
+          "weight": 5.18
+        },
+        {
+          "id": "00919",
+          "name": "群益台灣精選高息",
+          "weight": 4.2
+        }
+      ],
+      "history": [
+        {
+          "year": 2025,
+          "pnl": -2820,
+          "win": false
+        },
+        {
+          "year": 2024,
+          "pnl": -1640,
+          "win": false
+        },
+        {
+          "year": 2023,
+          "pnl": 2240,
+          "win": true
+        },
+        {
+          "year": 2022,
+          "pnl": -1980,
+          "win": false
+        },
+        {
+          "year": 2021,
+          "pnl": 1820,
+          "win": true
+        }
+      ],
+      "fillDays": [
+        8,
+        4,
+        12
+      ]
+    },
+    {
+      "ticker": "2603",
+      "name": "長榮",
+      "sector": "航運",
+      "spotPrice": 178,
+      "futuresPrice": 176.5,
+      "cashDividend": 16,
+      "exDate": "2026-06-17",
+      "futuresVolume": 3201,
+      "marginTier": "A",
+      "expectedDeclinePct": 7,
+      "targetHoldDays": 15,
+      "etfs": [
+        {
+          "id": "00919",
+          "name": "群益台灣精選高息",
+          "weight": 6.21
+        },
+        {
+          "id": "00940",
+          "name": "元大臺灣價值高息",
+          "weight": 5.83
+        },
+        {
+          "id": "00900",
+          "name": "富邦特選高股息30",
+          "weight": 4.55
+        }
+      ],
+      "history": [
+        {
+          "year": 2025,
+          "pnl": 24820,
+          "win": true
+        },
+        {
+          "year": 2024,
+          "pnl": 31460,
+          "win": true
+        },
+        {
+          "year": 2023,
+          "pnl": -3680,
+          "win": false
+        },
+        {
+          "year": 2022,
+          "pnl": 28640,
+          "win": true
+        },
+        {
+          "year": 2021,
+          "pnl": 8240,
+          "win": true
+        }
+      ],
+      "fillDays": [
+        null,
+        124,
+        38
+      ]
+    },
+    {
+      "ticker": "2308",
+      "name": "台達電",
+      "sector": "電子零組件",
+      "spotPrice": 2180,
+      "futuresPrice": 2170,
+      "cashDividend": 11.6,
+      "exDate": "2026-06-17",
+      "futuresVolume": 980,
+      "marginTier": "A",
+      "expectedDeclinePct": 3,
+      "targetHoldDays": 10,
+      "etfs": [
+        {
+          "id": "00929",
+          "name": "復華台灣科技優息",
+          "weight": 6.85
+        },
+        {
+          "id": "00878",
+          "name": "國泰永續高股息",
+          "weight": 4.2
+        }
+      ],
+      "history": [
+        {
+          "year": 2025,
+          "pnl": 19620,
+          "win": true
+        },
+        {
+          "year": 2024,
+          "pnl": 17480,
+          "win": true
+        },
+        {
+          "year": 2023,
+          "pnl": -3820,
+          "win": false
+        },
+        {
+          "year": 2022,
+          "pnl": 18540,
+          "win": true
+        },
+        {
+          "year": 2021,
+          "pnl": 11280,
+          "win": true
+        }
+      ],
+      "fillDays": [
+        35,
+        18,
+        26
+      ]
+    },
+    {
+      "ticker": "1319",
+      "name": "東陽",
+      "sector": "汽車零組件",
+      "spotPrice": 122,
+      "futuresPrice": 120.5,
+      "cashDividend": 5,
+      "exDate": "2026-06-22",
+      "futuresVolume": 280,
+      "marginTier": "B",
+      "expectedDeclinePct": 5,
+      "targetHoldDays": 12,
+      "etfs": [],
+      "history": [
+        {
+          "year": 2025,
+          "pnl": 11240,
+          "win": true
+        },
+        {
+          "year": 2024,
+          "pnl": 14420,
+          "win": true
+        },
+        {
+          "year": 2023,
+          "pnl": 9380,
+          "win": true
+        },
+        {
+          "year": 2022,
+          "pnl": -3840,
+          "win": false
+        },
+        {
+          "year": 2021,
+          "pnl": 1980,
+          "win": true
+        }
+      ],
+      "fillDays": [
+        24,
+        null,
+        null
+      ]
+    },
+    {
+      "ticker": "2891",
+      "name": "中信金",
+      "sector": "金融",
+      "spotPrice": 58.2,
+      "futuresPrice": 58,
+      "cashDividend": 2.5,
+      "exDate": "2026-07-14",
+      "futuresVolume": 2103,
+      "marginTier": "A",
+      "estimated": true,
+      "expectedDeclinePct": 1.8,
+      "targetHoldDays": 7,
+      "etfs": [
+        {
+          "id": "0056",
+          "name": "元大高股息",
+          "weight": 5.14
+        },
+        {
+          "id": "00878",
+          "name": "國泰永續高股息",
+          "weight": 4.78
+        },
+        {
+          "id": "00919",
+          "name": "群益台灣精選高息",
+          "weight": 5.62
+        }
+      ],
+      "history": [
+        {
+          "year": 2025,
+          "pnl": 1180,
+          "win": true
+        },
+        {
+          "year": 2024,
+          "pnl": 1820,
+          "win": true
+        },
+        {
+          "year": 2023,
+          "pnl": 640,
+          "win": true
+        },
+        {
+          "year": 2022,
+          "pnl": -1240,
+          "win": false
+        },
+        {
+          "year": 2021,
+          "pnl": 980,
+          "win": true
+        }
+      ],
+      "fillDays": [
+        null,
+        92,
+        70
+      ]
+    },
+    {
+      "ticker": "2412",
+      "name": "中華電",
+      "sector": "電信",
+      "spotPrice": 130,
+      "futuresPrice": 129.5,
+      "cashDividend": 5,
+      "exDate": "2026-07-03",
+      "futuresVolume": 612,
+      "marginTier": "A",
+      "estimated": true,
+      "expectedDeclinePct": 3.5,
+      "targetHoldDays": 10,
+      "etfs": [
+        {
+          "id": "0056",
+          "name": "元大高股息",
+          "weight": 3.45
+        },
+        {
+          "id": "00878",
+          "name": "國泰永續高股息",
+          "weight": 4.12
+        },
+        {
+          "id": "00713",
+          "name": "元大台灣高息低波",
+          "weight": 4.88
+        }
+      ],
+      "history": [
+        {
+          "year": 2025,
+          "pnl": 7240,
+          "win": true
+        },
+        {
+          "year": 2024,
+          "pnl": 8580,
+          "win": true
+        },
+        {
+          "year": 2023,
+          "pnl": 6820,
+          "win": true
+        },
+        {
+          "year": 2022,
+          "pnl": 5120,
+          "win": true
+        },
+        {
+          "year": 2021,
+          "pnl": 3640,
+          "win": true
+        }
+      ],
+      "fillDays": [
+        28,
+        42,
+        31
+      ]
+    },
+    {
+      "ticker": "1101",
+      "name": "台泥",
+      "sector": "水泥",
+      "spotPrice": 32.1,
+      "futuresPrice": 31.95,
+      "cashDividend": 1.5,
+      "exDate": "2026-07-10",
+      "futuresVolume": 412,
+      "marginTier": "A",
+      "estimated": true,
+      "expectedDeclinePct": 5.5,
+      "targetHoldDays": 12,
+      "etfs": [
+        {
+          "id": "0056",
+          "name": "元大高股息",
+          "weight": 2.18
+        },
+        {
+          "id": "00713",
+          "name": "元大台灣高息低波",
+          "weight": 3.05
+        }
+      ],
+      "history": [
+        {
+          "year": 2025,
+          "pnl": 4880,
+          "win": true
+        },
+        {
+          "year": 2024,
+          "pnl": -1340,
+          "win": false
+        },
+        {
+          "year": 2023,
+          "pnl": 3620,
+          "win": true
+        },
+        {
+          "year": 2022,
+          "pnl": -980,
+          "win": false
+        },
+        {
+          "year": 2021,
+          "pnl": 2740,
+          "win": true
+        }
+      ],
+      "fillDays": [
+        58,
+        null,
+        41
+      ]
+    }
+  ]
+}

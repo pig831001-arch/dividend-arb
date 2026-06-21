@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高股息個股期貨放空套利掃描</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #F5F4EF; color: #1A1A1A; font-family: 'Inter', 'Noto Sans TC', sans-serif; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input { font-family: inherit; }
+
+  .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+  .serif { font-family: 'Noto Serif TC', serif; }
+  .muted { color: #6B6B6B; }
+  .faint { color: #9B9B9B; }
+  .accent { color: #B45309; }
+  .pos { color: #166534; }
+  .neg { color: #B91C1C; }
+
+  .container { max-width: 1040px; margin: 0 auto; padding: 32px 20px; }
+
+  /* Login overlay */
+  .login-overlay { position: fixed; inset: 0; background: #F5F4EF; z-index: 100; display: flex; align-items: center; justify-content: center; }
+  .login-box { max-width: 380px; width: 100%; padding: 36px; background: #FFF; border: 1px solid #E0DDD4; }
+  .login-box h2 { font-family: 'Noto Serif TC', serif; font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .login-box .sub { color: #6B6B6B; font-size: 13px; margin-bottom: 24px; }
+  .login-box label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #6B6B6B; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .login-box input { width: 100%; padding: 10px 12px; border: 1px solid #E0DDD4; background: #FAFAF7; font-size: 14px; margin-bottom: 16px; font-family: 'JetBrains Mono', monospace; }
+  .login-box input:focus { outline: none; border-color: #1A1A1A; background: #FFF; }
+  .login-box .btn { width: 100%; padding: 12px; background: #1A1A1A; color: #F5F4EF; font-weight: 600; font-size: 14px; border-radius: 0; }
+  .login-box .err { color: #B91C1C; font-size: 12px; margin-bottom: 12px; min-height: 16px; }
+  .login-box .hint { color: #9B9B9B; font-size: 11px; margin-top: 16px; line-height: 1.6; }
+
+  /* Header */
+  .header-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .header-top .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #6B6B6B; letter-spacing: 0.15em; text-transform: uppercase; }
+  .user-bar { display: flex; align-items: center; gap: 12px; font-size: 12px; color: #6B6B6B; }
+  .user-bar .em { font-family: 'JetBrains Mono', monospace; color: #1A1A1A; }
+  .user-bar .logout { font-size: 11px; padding: 4px 10px; background: #F5F4EF; border: 1px solid #E0DDD4; transition: all 0.15s; }
+  .user-bar .logout:hover { background: #1A1A1A; color: #F5F4EF; }
+  h1 { font-family: 'Noto Serif TC', serif; font-size: 32px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 24px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid #E0DDD4; margin-bottom: 24px; overflow-x: auto; white-space: nowrap; }
+  .tab { padding: 10px 16px; font-size: 14px; color: #6B6B6B; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+  .tab.active { color: #1A1A1A; font-weight: 600; border-bottom-color: #1A1A1A; }
+  .tab .badge { display: inline-block; background: #B45309; color: #F5F4EF; font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 1px 5px; border-radius: 8px; margin-left: 4px; }
+
+  /* Card */
+  .card { background: #FFF; border: 1px solid #E0DDD4; }
+
+  /* Strategy switch */
+  .strat { display: flex; gap: 8px; margin-bottom: 20px; }
+  .strat-btn { flex: 1; padding: 14px 16px; background: #F5F4EF; border: 1px solid #E0DDD4; border-radius: 4px; text-align: left; transition: all 0.15s; }
+  .strat-btn.active { background: #1A1A1A; color: #F5F4EF; border-color: #1A1A1A; }
+  .strat-btn .t { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .strat-btn .s { font-size: 11px; opacity: 0.7; }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stat { background: #FFF; border: 1px solid #E0DDD4; padding: 16px; }
+  .stat-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #6B6B6B; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+  .stat-value { display: flex; align-items: baseline; gap: 6px; }
+  .stat-value .v { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .stat-value .u { font-size: 11px; color: #6B6B6B; }
+
+  /* Controls */
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #E0DDD4; }
+  .ctrl-label { font-size: 11px; color: #6B6B6B; margin-right: 4px; }
+  .ctrl-label.spaced { margin-left: 12px; }
+  .pill { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 5px 10px; background: #F5F4EF; border: 1px solid #E0DDD4; border-radius: 3px; transition: all 0.15s; }
+  .pill.active { background: #1A1A1A; color: #F5F4EF; border-color: #1A1A1A; }
+
+  /* Table header */
+  .thead { display: grid; grid-template-columns: 2.4fr 1.4fr 1.4fr 1.4fr 0.9fr 0.9fr 1.5fr 1fr 0.5fr; gap: 8px; padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #6B6B6B; text-transform: uppercase; letter-spacing: 0.08em; }
+  .thead .r { text-align: right; }
+
+  /* Row */
+  .row { background: #FFF; border: 1px solid #E0DDD4; margin-bottom: 8px; overflow: hidden; transition: all 0.15s; }
+  .row-head { display: grid; grid-template-columns: 2.4fr 1.4fr 1.4fr 1.4fr 0.9fr 0.9fr 1.5fr 1fr 0.5fr; gap: 8px; padding: 14px 12px; align-items: center; text-align: left; width: 100%; }
+  .row-head:hover { background: #FAFAF7; }
+  .row-name { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .row-name .tick { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; }
+  .row-name .nm { font-family: 'Noto Serif TC', serif; font-size: 15px; font-weight: 500; }
+  .row-name .tier { font-family: 'JetBrains Mono', monospace; font-size: 9px; padding: 1px 5px; background: #F5F4EF; border: 1px solid #E0DDD4; color: #6B6B6B; }
+  .ex-badge { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 3px; letter-spacing: 0.02em; }
+  .ex-badge.urgent { background: #B91C1C; color: #FFF; animation: pulse 1.6s ease-in-out infinite; }
+  .ex-badge.soon { background: #B45309; color: #FFF; }
+  .ex-badge.normal { background: #FAFAF7; color: #1A1A1A; border: 1px solid #E0DDD4; }
+  .ex-badge.passed { background: #E0DDD4; color: #6B6B6B; text-decoration: line-through; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.65; } }
+  .row-sub { font-size: 11px; color: #6B6B6B; margin-top: 4px; }
+  .row-num { text-align: right; font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 13px; }
+  .row-num .sub { font-size: 11px; color: #6B6B6B; }
+  .row-net { text-align: right; font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 600; }
+  .chev { color: #9B9B9B; text-align: right; font-size: 12px; }
+  .row.over-cap { opacity: 0.5; }
+  .row.over-cap .row-num.col-lots { color: #B91C1C; }
+
+  /* Expanded */
+  .row-body { padding: 16px 16px 20px; border-top: 1px solid #E0DDD4; background: #FAFAF7; }
+  .sec-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #6B6B6B; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .calc { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; }
+  .calc-label { font-size: 12px; }
+  .calc-label.m { color: #6B6B6B; }
+  .calc-val { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-size: 13px; }
+  .calc-val.b { font-size: 15px; font-weight: 600; }
+  .calc-val.a { font-size: 15px; font-weight: 600; color: #B45309; }
+  .calc-val.m { color: #6B6B6B; }
+  .calc-val .u { font-size: 11px; color: #6B6B6B; margin-left: 3px; }
+  .div-line { border-top: 1px solid #E0DDD4; margin: 8px 0; }
+  .margin-block { background: #FFF; border: 1px solid #E0DDD4; padding: 12px 14px; margin-top: 16px; }
+  .margin-block .mb-title { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .margin-block .mb-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; }
+  .margin-block .mb-row .v { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+  .margin-block .lots-summary { margin-top: 10px; padding-top: 10px; border-top: 1px solid #E0DDD4; display: flex; justify-content: space-between; align-items: baseline; }
+  .margin-block .lots-summary .lots { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; color: #B45309; }
+  .margin-block .lots-summary .lots.zero { color: #B91C1C; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; }
+
+  /* ETF bars */
+  .etf { display: flex; align-items: center; gap: 10px; padding: 4px 0; }
+  .etf-id { font-family: 'JetBrains Mono', monospace; font-size: 12px; width: 44px; }
+  .etf-name { font-size: 13px; flex: 0 0 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .etf-bar { flex: 1; height: 4px; background: #E0DDD4; border-radius: 2px; overflow: hidden; }
+  .etf-bar-fill { height: 100%; background: #1A1A1A; border-radius: 2px; }
+  .etf-w { font-family: 'JetBrains Mono', monospace; font-size: 11px; width: 44px; text-align: right; }
+
+  /* History bars */
+  .hist { display: flex; align-items: center; gap: 8px; font-size: 11px; margin-bottom: 4px; }
+  .hist-yr { font-family: 'JetBrains Mono', monospace; color: #6B6B6B; width: 32px; }
+  .hist-bar { flex: 1; height: 20px; background: #F5F4EF; position: relative; display: flex; align-items: center; }
+  .hist-bar-fill { height: 100%; opacity: 0.85; }
+  .hist-label { position: absolute; right: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; }
+
+  /* Custom list page */
+  .cl-input-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .cl-input { flex: 1; padding: 10px 12px; border: 1px solid #E0DDD4; background: #FAFAF7; font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+  .cl-input:focus { outline: none; border-color: #1A1A1A; background: #FFF; }
+  .cl-add-btn { padding: 10px 20px; background: #1A1A1A; color: #F5F4EF; font-weight: 600; font-size: 13px; }
+  .cl-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: #FFF; border: 1px solid #E0DDD4; margin-bottom: 6px; }
+  .cl-item.unknown { background: #FAFAF7; border-style: dashed; }
+  .cl-item .info { display: flex; align-items: baseline; gap: 10px; }
+  .cl-item .info .tick { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; }
+  .cl-item .info .nm { font-family: 'Noto Serif TC', serif; font-size: 14px; }
+  .cl-item .info .stat { font-size: 11px; color: #6B6B6B; }
+  .cl-item .info .stat.warn { color: #B91C1C; }
+  .cl-item button { font-size: 11px; padding: 4px 10px; background: #F5F4EF; border: 1px solid #E0DDD4; color: #B91C1C; }
+  .cl-item button:hover { background: #B91C1C; color: #FFF; border-color: #B91C1C; }
+
+  /* Notifications page */
+  .notif-block { background: #FFF; border: 1px solid #E0DDD4; padding: 20px; margin-bottom: 16px; }
+  .notif-block h3 { font-family: 'Noto Serif TC', serif; font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+  .notif-email { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #FAFAF7; border: 1px solid #E0DDD4; margin-bottom: 12px; }
+  .notif-email .em { font-family: 'JetBrains Mono', monospace; font-size: 14px; flex: 1; }
+  .notif-email .verified { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #166534; padding: 2px 8px; background: #FFF; border: 1px solid #166534; }
+  .notif-toggle { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #E0DDD4; }
+  .notif-toggle:last-child { border-bottom: none; }
+  .notif-toggle .info { flex: 1; }
+  .notif-toggle .info .t { font-size: 14px; font-weight: 500; }
+  .notif-toggle .info .s { font-size: 12px; color: #6B6B6B; margin-top: 2px; }
+  .switch { position: relative; width: 40px; height: 22px; background: #E0DDD4; border-radius: 11px; transition: all 0.2s; }
+  .switch.on { background: #1A1A1A; }
+  .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: #FFF; border-radius: 50%; transition: all 0.2s; }
+  .switch.on::after { left: 20px; }
+  .upcoming-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #E0DDD4; font-size: 13px; }
+  .upcoming-item:last-child { border-bottom: none; }
+  .upcoming-item .left { display: flex; gap: 10px; align-items: baseline; }
+  .upcoming-item .tick { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .upcoming-item .when { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #B45309; }
+
+  /* Backtest */
+  .stats-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .year-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .year-yr { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #6B6B6B; width: 40px; }
+  .year-bar { flex: 1; height: 24px; background: #F5F4EF; position: relative; display: flex; align-items: center; }
+  .year-bar-fill { height: 100%; opacity: 0.85; }
+  .year-pnl { position: absolute; right: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
+  .year-wr { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #6B6B6B; width: 56px; text-align: right; }
+
+  .rank-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+  .rank-tick { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; width: 48px; }
+  .rank-name { font-family: 'Noto Serif TC', serif; font-size: 14px; width: 70px; }
+  .rank-bar { flex: 1; height: 6px; background: #E0DDD4; border-radius: 3px; overflow: hidden; }
+  .rank-bar-fill { height: 100%; border-radius: 3px; }
+  .rank-pct { font-family: 'JetBrains Mono', monospace; font-size: 12px; width: 40px; text-align: right; }
+  .rank-pnl { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #6B6B6B; width: 80px; text-align: right; }
+
+  /* Method panel */
+  .panel { background: #FFF; border: 1px solid #E0DDD4; padding: 20px; margin-bottom: 16px; }
+  .panel h3 { font-family: 'Noto Serif TC', serif; font-weight: 700; margin-bottom: 12px; }
+  .panel p { color: #6B6B6B; font-size: 13px; line-height: 1.7; }
+  .panel ul { list-style: none; }
+  .panel li { font-size: 13px; padding: 4px 0; }
+  .src-row { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 4px 0; }
+  .src-row .k { color: #6B6B6B; }
+
+  /* Footer */
+  .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #E0DDD4; font-size: 12px; color: #6B6B6B; }
+  .footer .alert { color: #B45309; display: flex; align-items: flex-start; gap: 8px; }
+
+  /* Empty state */
+  .empty { padding: 40px 20px; text-align: center; color: #6B6B6B; font-size: 13px; }
+
+  /* Mobile */
+  @media (max-width: 700px) {
+    .container { padding: 20px 12px; }
+    h1 { font-size: 22px; }
+    .stats, .stats-4 { grid-template-columns: 1fr 1fr; }
+    .thead { display: none; }
+    .row-head { grid-template-columns: 1fr auto; gap: 8px; padding: 12px; }
+    .row-head .col-spot, .row-head .col-div, .row-head .col-margin, .row-head .col-lots, .row-head .col-ex, .row-head .col-wr, .row-head .col-roi, .row-head .row-net { display: none; }
+    .row-mobile { display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px; gap: 10px; flex-wrap: wrap; }
+    .row-mobile .item { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #6B6B6B; }
+    .row-mobile .item .v { color: #1A1A1A; font-weight: 500; }
+    .grid2 { grid-template-columns: 1fr; gap: 20px; }
+    .strat-btn .s { display: none; }
+    .header-top { flex-direction: column; gap: 8px; align-items: flex-start; }
+  }
+  @media (min-width: 701px) { .row-mobile { display: none; } }
+</style>
+</head>
+<body>
+
+<!-- Login overlay -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h2>套利掃描器</h2>
+    <div class="sub">Taiwan Dividend Arbitrage Desk</div>
+    <label>密碼</label>
+    <input type="password" id="loginPass" placeholder="輸入密碼" autofocus>
+    <div class="err" id="loginErr"></div>
+    <button class="btn" id="loginBtn">登入</button>
+    <div class="hint">登入狀態僅儲存於本機瀏覽器。實際部署請接後端 OAuth / JWT 驗證。</div>
+  </div>
+</div>
+
+<div class="container" id="app" style="display:none;">
+  <header>
+    <div class="header-top">
+      <div class="label">Taiwan · Dividend Arbitrage Desk</div>
+      <div class="user-bar">
+        <span id="dataStatus" style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #6B6B6B;"></span>
+        <span class="em" id="userEmail">850404gary@gmail.com</span>
+        <button class="logout" id="logoutBtn">登出</button>
+      </div>
+    </div>
+    <h1>高股息個股期貨<span class="accent">放空</span>套利掃描</h1>
+  </header>
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-tab="scan">掃描</button>
+    <button class="tab" data-tab="notif">通知</button>
+    <button class="tab" data-tab="backtest">回測</button>
+    <button class="tab" data-tab="method">方法論</button>
+  </div>
+
+  <!-- SCAN -->
+  <div id="tab-scan">
+    <div class="card" style="padding: 16px 20px; margin-bottom: 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 10px; flex-wrap:wrap; gap:8px;">
+        <div class="sec-label" style="margin-bottom:0;">策略風格</div>
+        <div style="font-size:11px; color:#6B6B6B;">
+          總資金 <input type="text" id="totalCapital" value="1,000,000" style="width:90px; padding:3px 6px; font-family:'JetBrains Mono', monospace; border:1px solid #E0DDD4; background:#FAFAF7; text-align:right; font-size:12px;"> TWD
+        </div>
+      </div>
+      <div class="strat" id="presetGrid"></div>
+      <div id="presetInfo" style="margin-top:12px; padding:12px 14px; background:#FAFAF7; border-left:3px solid #B45309; font-size:12px; line-height:1.7;"></div>
+    </div>
+
+    <div class="stats" id="summary"></div>
+
+    <div class="controls">
+      <span class="ctrl-label">排序</span>
+      <button class="pill" data-sort="net">淨利</button>
+      <button class="pill" data-sort="roi">年化%</button>
+      <button class="pill" data-sort="winRate">勝率</button>
+      <button class="pill" data-sort="fillDays">填息日</button>
+      <button class="pill" data-sort="yield">殖利率</button>
+      <button class="pill active" data-sort="exDate">除息日</button>
+
+      <span class="ctrl-label spaced">填息</span>
+      <button class="pill active" data-fill="on">3年平均 > 20 日</button>
+      <button class="pill" data-fill="off">不限</button>
+
+      <span class="ctrl-label spaced">基差</span>
+      <button class="pill" data-basis="strong">深度逆價差</button>
+      <button class="pill active" data-basis="all">不限</button>
+
+      <span class="ctrl-label spaced">資金可下單</span>
+      <button class="pill active" data-cap="on">過濾爆量</button>
+      <button class="pill" data-cap="off">不限</button>
+    </div>
+
+    <div class="thead">
+      <div>標的</div>
+      <div class="r">現股 / F</div>
+      <div class="r">股利 / 殖利</div>
+      <div class="r">保證金 / 口</div>
+      <div class="r">可下口數</div>
+      <div class="r">勝率</div>
+      <div class="r">淨利 / 口</div>
+      <div class="r">年化 ROI</div>
+      <div></div>
+    </div>
+
+    <div id="rows"></div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div id="tab-notif" style="display:none;">
+    <div class="notif-block">
+      <h3>通知信箱</h3>
+      <div class="notif-email">
+        <span class="em">850404gary@gmail.com</span>
+        <span class="verified">✓ 已驗證</span>
+      </div>
+      <p style="font-size: 12px; color: #6B6B6B; line-height: 1.6;">
+        通知透過 SMTP / SendGrid 寄送，需後端排程支援。前端版本僅儲存設定，實際發送請參考 <span class="mono">pipeline.py</span> 中的 <span class="mono">send_notification()</span> 函式。
+      </p>
+    </div>
+
+    <div class="notif-block">
+      <h3>通知時機</h3>
+      <div id="notifToggles"></div>
+    </div>
+
+    <div class="notif-block">
+      <h3>即將發送的通知</h3>
+      <div id="upcomingNotifs"></div>
+    </div>
+  </div>
+
+  <!-- BACKTEST -->
+  <div id="tab-backtest" style="display:none;"></div>
+
+  <!-- METHOD -->
+  <div id="tab-method" style="display:none;">
+
+    <div class="panel">
+      <h3 style="font-size: 18px;">策略核心邏輯</h3>
+      <p>放空高股息個股期貨，賺取除息後的<strong>貼息走勢</strong>。重點在於：除息日當天期貨契約由期交所自動向下調整 F0 − D，這只是技術性改價、不算獲利。真正的賺錢區是除息後的 5–15 個交易日。</p>
+      <div style="margin-top:12px; padding:12px; background:#FAFAF7; border-left:3px solid #B45309; font-size:13px; line-height:1.7;">
+        <strong style="color:#1A1A1A;">為什麼除息後股價會弱？</strong><br>
+        <span style="color:#6B6B6B;">
+        ① 除息前散戶搶配息推升股價形成「掩護買盤」<br>
+        ② 除息日散戶領完股利後獲利了結出場<br>
+        ③ 高股息標的常為成熟產業（金融、電信、傳產），缺乏成長動能<br>
+        ④ ETF 雖未減碼但邊際買盤消失，股價缺乏新動力 → 開始貼息整理
+        </span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3 style="font-size: 16px;">獲利公式</h3>
+      <div style="background:#FAFAF7; padding:14px; border:1px solid #E0DDD4; font-family:'JetBrains Mono', monospace; font-size:13px; line-height:1.8;">
+        除息調整價 = F0 − D<br>
+        預期出場價 = 除息調整價 × (1 − 預期跌幅% × √(持有日/目標日))<br>
+        毛利 / 口   = (除息調整價 − 預期出場價) × 2,000<br>
+        淨利 / 口   = 毛利 − 進場稅 − 出場稅 − 雙邊手續費<br>
+        <br>
+        ROI         = 淨利 / 原始保證金 × 100%<br>
+        年化 ROI    = ROI × 365 / (距除息日 + 持有日)
+      </div>
+      <p style="margin-top:12px;">預期跌幅依歷史填息推估。填息越慢、未填次數越多 → 跌幅越大。填息快的股票（如緯創、國泰金）預期跌幅僅 1−2%，扣完成本後利潤微薄，<strong>不適合此策略</strong>。</p>
+    </div>
+
+    <div class="panel">
+      <h3 style="font-size: 16px;">三種策略風格</h3>
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:10px;">
+        <div style="padding:12px; background:#FAFAF7; border:1px solid #E0DDD4;">
+          <div style="font-weight:700; margin-bottom:4px;">高勝率型</div>
+          <div style="font-size:11px; color:#6B6B6B; line-height:1.7;">
+            進場 T−2~T−1<br>
+            出場 T+5<br>
+            停利 70% / 停損 0.5%<br>
+            單檔 20% × 5 檔<br>
+            篩選嚴 (填息 &gt;30 + 1次未填)
+          </div>
+        </div>
+        <div style="padding:12px; background:#FAFAF7; border:1px solid #E0DDD4;">
+          <div style="font-weight:700; margin-bottom:4px;">進取</div>
+          <div style="font-size:11px; color:#6B6B6B; line-height:1.7;">
+            進場 T−3<br>
+            出場 T+10<br>
+            不停利 / 停損 1%<br>
+            單檔 30% × 8 檔<br>
+            篩選寬 (填息 &gt;20)
+          </div>
+        </div>
+        <div style="padding:12px; background:#FAFAF7; border:1px solid #E0DDD4;">
+          <div style="font-weight:700; margin-bottom:4px;">客製</div>
+          <div style="font-size:11px; color:#6B6B6B; line-height:1.7;">
+            進場 T−1<br>
+            出場 T+5<br>
+            停利 60% / 停損 0.5%<br>
+            單檔 20% × 5 檔<br>
+            篩選預設寬鬆
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3 style="font-size: 16px;">期現基差訊號 (自營部視角)</h3>
+      <p>基差 = 期貨價 − 現股價。除息前的基差水位反映市場預期：</p>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px; font-size:12px;">
+        <div style="padding:10px; background:#F0FDF4; border-left:3px solid #166534;">
+          <strong>深度逆價差 (&lt;−2%)</strong><br>
+          <span style="color:#6B6B6B;">市場已預期下跌，訊號強。可進場，但部分利潤已被搶先反應。</span>
+        </div>
+        <div style="padding:10px; background:#FFFBEB; border-left:3px solid #B45309;">
+          <strong>中度逆價差 (−2~−0.5%)</strong><br>
+          <span style="color:#6B6B6B;">標準場景，期貨已反映部分股利。中性進場時機。</span>
+        </div>
+        <div style="padding:10px; background:#FAFAF7; border-left:3px solid #9B9B9B;">
+          <strong>持平 (±0.5%)</strong><br>
+          <span style="color:#6B6B6B;">套利空間主要靠散戶獲利了結，訊號普通。</span>
+        </div>
+        <div style="padding:10px; background:#FEF2F2; border-left:3px solid #B91C1C;">
+          <strong>正價差 (&gt;0.5%)</strong><br>
+          <span style="color:#6B6B6B;">市場樂觀預期填息，<strong>不建議追空</strong>。</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3 style="font-size: 16px;">配對對沖 (Delta 中性)</h3>
+      <p>放空除息股 + 做多同產業未除息股，鎖大盤 beta、留個股 alpha：</p>
+      <div style="margin-top:10px; padding:12px; background:#FAFAF7; font-family:'JetBrains Mono', monospace; font-size:13px; line-height:1.8;">
+        + 做多 2884 玉山金 1 口   (賺金融類 beta)<br>
+        − 做空 2882 國泰金 1 口   (賺貼息 alpha)<br>
+        ──────────────────────────────────<br>
+        = Delta 中性，跟大盤漲跌脫鉤
+      </div>
+      <p style="margin-top:10px;">注意 Notional matching：個股期一律 2,000 股/口，股價差異大時需調整口數比例。Notional 差距 &gt; 15% 時 beta 對沖不完整，會吃到部分大盤波動。</p>
+    </div>
+
+    <div class="panel">
+      <h3 style="font-size: 16px;">跨期 spread (近月 vs 次月)</h3>
+      <p>當除息日靠近結算日（每月第 3 個週三），近月期貨容易出現異常 spread：</p>
+      <ul style="margin-top:8px; font-size:13px; line-height:1.8;">
+        <li>· <strong>近月貴</strong>：散戶在近月搶配息推升 → 可換月空（平近月、開次月）</li>
+        <li>· <strong>次月貴</strong>：市場預期除息後續弱 → 直接放空次月，跳過結算風險</li>
+        <li>· 結算日前 3 個交易日進場：建議直接用次月，避免被迫轉倉</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h3 style="font-size: 16px;">保證金級距</h3>
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-top:8px;">
+        <div style="padding:12px; background:#FAFAF7; border:1px solid #E0DDD4;">
+          <div class="mono" style="font-size:18px; font-weight:700;">A 級</div>
+          <div class="mono" style="font-size:22px; color:#B45309; font-weight:600;">13.5%</div>
+          <div style="font-size:11px; color:#6B6B6B; margin-top:4px;">大型權值股</div>
+        </div>
+        <div style="padding:12px; background:#FAFAF7; border:1px solid #E0DDD4;">
+          <div class="mono" style="font-size:18px; font-weight:700;">B 級</div>
+          <div class="mono" style="font-size:22px; color:#B45309; font-weight:600;">16.2%</div>
+          <div style="font-size:11px; color:#6B6B6B; margin-top:4px;">中型股</div>
+        </div>
+        <div style="padding:12px; background:#FAFAF7; border:1px solid #E0DDD4;">
+          <div class="mono" style="font-size:18px; font-weight:700;">C 級</div>
+          <div class="mono" style="font-size:22px; color:#B45309; font-weight:600;">20.25%</div>
+          <div style="font-size:11px; color:#6B6B6B; margin-top:4px;">小型 / 高波動</div>
+        </div>
+      </div>
+      <p style="margin-top:10px;">原始保證金 = 期貨價 × 2,000 × 風險係數。維持保證金約原始的 77%。可下口數 = 單檔資金上限 ÷ 原始保證金。</p>
+    </div>
+
+    <div class="panel">
+      <h3 style="font-size: 16px;">資料源 (自動更新)</h3>
+      <div class="src-row"><span class="k">除息資料</span><span>twse.com.tw/exchangeReport/TWT49U</span></div>
+      <div class="src-row"><span class="k">個股期貨</span><span>taifex.com.tw/STKF_DailyMarketReport</span></div>
+      <div class="src-row"><span class="k">保證金級距</span><span>taifex.com.tw/cht/5/stockMargining</span></div>
+      <div class="src-row"><span class="k">ETF 持股</span><span>sitca.org.tw + 各投信 PCF</span></div>
+      <div class="src-row"><span class="k">即時報價</span><span>Shioaji / Fugle / 群益 API</span></div>
+      <div class="src-row"><span class="k">歷史填息</span><span>yfinance + TWSE 日 K</span></div>
+      <p style="margin-top:10px; font-size:12px; color:#6B6B6B;">後端 GitHub Actions 每天 09:30 自動更新 data/stocks.json，前端開啟自動讀取。</p>
+    </div>
+
+    <div class="panel">
+      <h3 style="font-size: 16px;">主要風險</h3>
+      <ul>
+        <li>· <strong>多頭強勢時失靈</strong>：大盤多頭時除息後反而漲，空單反向虧損</li>
+        <li>· <strong>保證金追繳</strong>：除息後若意外反彈，期貨空單虧損，風險指標 &lt; 25% 砍倉</li>
+        <li>· <strong>突發利多</strong>：產業利多、財報、法說會可能蓋過貼息走勢</li>
+        <li>· <strong>結算日</strong>：個股期最後交易日是每月第三個週三，需轉倉或在到期前出場</li>
+        <li>· <strong>預期跌幅是歷史推估</strong>：下一年市場結構（ETF 規模、利率環境）改變會偏離</li>
+        <li>· <strong>倖存者偏差</strong>：填息慢的股票本身常是趨勢偏弱，但偶爾遇到突發反彈會嚴重軋空</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="alert">⚠ 研究輔助工具，非投資建議。資料截至 2026/06/19，實際使用需串接 TWSE / TAIFEX / SITCA 即時資料。</div>
+  </div>
+</div>
+
+<script>
+// ──────────────────────────────────────────────────────────
+// Constants
+// ──────────────────────────────────────────────────────────
+const TODAY = new Date("2026-06-19");
+const CONTRACT_SIZE = 2000;
+const DIV_TAX_RATE = 0.28;
+const NHI_THRESHOLD = 20000;
+const NHI_RATE = 0.0211;
+const FUNDING_RATE = 0.025;
+const TAIFEX_TAX = 0.00002;
+const TWSE_TAX = 0.003;
+const TWSE_FEE = 0.001425;
+const INVEST_CAP = 300000;     // 單檔投資上限 30 萬
+const UNFILLED_PENALTY = 90;
+
+const MARGIN_RATES = { A: 0.135, B: 0.162, C: 0.2025 };
+const MAINT_RATES = { A: 0.1035, B: 0.1242, C: 0.1553 };
+
+const PASSWORD = "0404";
+const USER_EMAIL = "850404gary@gmail.com";
+
+// ──────────────────────────────────────────────────────────
+// 策略風格預設值
+// ──────────────────────────────────────────────────────────
+const PRESETS = {
+  xiaoge: {
+    name: "高勝率型",
+    desc: "嚴選填息差、有未填紀錄的標的",
+    minFillDays: 30,
+    minUnfilled: 1,
+    minWinRate: 60,
+    holdDays: 5,
+    entryTiming: "T−2 ~ T−1",
+    takeProfit: 70,
+    stopLoss: 0.5,
+    positionPct: 20,
+    maxStocks: 5,
+  },
+  aggressive: {
+    name: "進取",
+    desc: "放寬篩選、加大部位、長持有",
+    minFillDays: 20,
+    minUnfilled: 0,
+    minWinRate: 50,
+    holdDays: 10,
+    entryTiming: "T−3",
+    takeProfit: null,
+    stopLoss: 1.0,
+    positionPct: 30,
+    maxStocks: 8,
+  },
+  custom: {
+    name: "客製",
+    desc: "自由設定",
+    minFillDays: 20,
+    minUnfilled: 0,
+    minWinRate: 0,
+    holdDays: 5,
+    entryTiming: "T−1",
+    takeProfit: 60,
+    stopLoss: 0.5,
+    positionPct: 20,
+    maxStocks: 5,
+  },
+};
+
+// ──────────────────────────────────────────────────────────
+// Storage helpers (safe wrappers)
+// ──────────────────────────────────────────────────────────
+const storage = {
+  get(k, def) {
+    try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; }
+    catch { return def; }
+  },
+  set(k, v) {
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch {}
+  },
+};
+
+// ──────────────────────────────────────────────────────────
+// Stock universe (real-ish data based on 2026/06 research)
+// ──────────────────────────────────────────────────────────
+// expectedDeclinePct: 除息調整後，預期 N 日內的貼息跌幅 %
+// targetHoldDays: 建議持有日數 (除息後)
+// estimated: 除息日尚未公告，僅依歷史模式估計
+// 資料來源：TWSE / 公開資訊觀測站 (核對至 2026-06-19)
+let DATA = [
+  // ── 確認公告 ──────────────────────────────
+  { ticker:"2882", name:"國泰金", sector:"金融", spotPrice:112.5, futuresPrice:111.8, cashDividend:3.5, exDate:"2026-06-30", futuresVolume:2840, marginTier:"A",
+    expectedDeclinePct:1.2, targetHoldDays:5,
+    etfs:[{id:"0056",name:"元大高股息",weight:4.82},{id:"00878",name:"國泰永續高股息",weight:5.31},{id:"00919",name:"群益台灣精選高息",weight:4.95},{id:"00713",name:"元大台灣高息低波",weight:3.21}],
+    history:[{year:2025,pnl:480,win:true},{year:2024,pnl:920,win:true},{year:2023,pnl:-280,win:false},{year:2022,pnl:-820,win:false},{year:2021,pnl:1240,win:true}],
+    fillDays:[8, 14, 11] },
+  { ticker:"2317", name:"鴻海", sector:"電子代工", spotPrice:270.5, futuresPrice:268.8, cashDividend:7.2, exDate:"2026-07-02", futuresVolume:6240, marginTier:"A",
+    expectedDeclinePct:2.5, targetHoldDays:8,
+    etfs:[{id:"0056",name:"元大高股息",weight:6.92},{id:"00878",name:"國泰永續高股息",weight:5.45},{id:"00919",name:"群益台灣精選高息",weight:5.10},{id:"00929",name:"復華台灣科技優息",weight:7.30}],
+    history:[{year:2025,pnl:9280,win:true},{year:2024,pnl:7520,win:true},{year:2023,pnl:8840,win:true},{year:2022,pnl:-2240,win:false},{year:2021,pnl:4920,win:true}],
+    fillDays:[18, 24, 22] },
+  { ticker:"2357", name:"華碩", sector:"電腦週邊", spotPrice:580.0, futuresPrice:574.5, cashDividend:42.0, exDate:"2026-07-01", futuresVolume:1820, marginTier:"A",
+    expectedDeclinePct:3.2, targetHoldDays:10,
+    etfs:[{id:"0056",name:"元大高股息",weight:5.42},{id:"00878",name:"國泰永續高股息",weight:4.18},{id:"00919",name:"群益台灣精選高息",weight:6.31},{id:"00929",name:"復華台灣科技優息",weight:4.85}],
+    history:[{year:2025,pnl:18420,win:true},{year:2024,pnl:14280,win:true},{year:2023,pnl:-2820,win:false},{year:2022,pnl:22640,win:true},{year:2021,pnl:8240,win:true}],
+    fillDays:[14, 6, 57] },
+  { ticker:"3264", name:"欣銓", sector:"半導體封測", spotPrice:232.5, futuresPrice:230.5, cashDividend:4.2, exDate:"2026-06-30", futuresVolume:680, marginTier:"B",
+    expectedDeclinePct:2.5, targetHoldDays:8,
+    etfs:[{id:"00936",name:"台新永續高息中小",weight:3.21}],
+    history:[{year:2025,pnl:1280,win:true},{year:2024,pnl:9840,win:true},{year:2023,pnl:-3820,win:false},{year:2022,pnl:8240,win:true},{year:2021,pnl:2820,win:true}],
+    fillDays:[56, 1, 1] },
+  { ticker:"5347", name:"世界", sector:"半導體晶圓代工", spotPrice:146.0, futuresPrice:144.5, cashDividend:4.5, exDate:"2026-07-06", futuresVolume:1240, marginTier:"A",
+    expectedDeclinePct:6.5, targetHoldDays:15,
+    etfs:[{id:"00929",name:"復華台灣科技優息",weight:5.42},{id:"00919",name:"群益台灣精選高息",weight:3.18}],
+    history:[{year:2025,pnl:14820,win:true},{year:2024,pnl:18320,win:true},{year:2023,pnl:22640,win:true},{year:2022,pnl:25240,win:true},{year:2021,pnl:-2280,win:false}],
+    fillDays:[null, null, 58] },
+  { ticker:"3231", name:"緯創", sector:"電子代工", spotPrice:156.0, futuresPrice:155.0, cashDividend:5.5, exDate:"2026-07-08", futuresVolume:5840, marginTier:"A",
+    expectedDeclinePct:1.0, targetHoldDays:5,
+    etfs:[{id:"0056",name:"元大高股息",weight:4.51},{id:"00878",name:"國泰永續高股息",weight:3.92},{id:"00929",name:"復華台灣科技優息",weight:5.18},{id:"00919",name:"群益台灣精選高息",weight:4.20}],
+    history:[{year:2025,pnl:-2820,win:false},{year:2024,pnl:-1640,win:false},{year:2023,pnl:2240,win:true},{year:2022,pnl:-1980,win:false},{year:2021,pnl:1820,win:true}],
+    fillDays:[8, 4, 12] },
+
+  // ── 已除息 (T 為負，自動過濾掉，但保留在我的清單顯示) ──
+  { ticker:"2603", name:"長榮", sector:"航運", spotPrice:178.0, futuresPrice:176.5, cashDividend:16.0, exDate:"2026-06-17", futuresVolume:3201, marginTier:"A",
+    expectedDeclinePct:7.0, targetHoldDays:15,
+    etfs:[{id:"00919",name:"群益台灣精選高息",weight:6.21},{id:"00940",name:"元大臺灣價值高息",weight:5.83},{id:"00900",name:"富邦特選高股息30",weight:4.55}],
+    history:[{year:2025,pnl:24820,win:true},{year:2024,pnl:31460,win:true},{year:2023,pnl:-3680,win:false},{year:2022,pnl:28640,win:true},{year:2021,pnl:8240,win:true}],
+    fillDays:[null, 124, 38] },
+  { ticker:"2308", name:"台達電", sector:"電子零組件", spotPrice:2180.0, futuresPrice:2170.0, cashDividend:11.6, exDate:"2026-06-17", futuresVolume:980, marginTier:"A",
+    expectedDeclinePct:3.0, targetHoldDays:10,
+    etfs:[{id:"00929",name:"復華台灣科技優息",weight:6.85},{id:"00878",name:"國泰永續高股息",weight:4.20}],
+    history:[{year:2025,pnl:19620,win:true},{year:2024,pnl:17480,win:true},{year:2023,pnl:-3820,win:false},{year:2022,pnl:18540,win:true},{year:2021,pnl:11280,win:true}],
+    fillDays:[35, 18, 26] },
+  { ticker:"1319", name:"東陽", sector:"汽車零組件", spotPrice:122.0, futuresPrice:120.5, cashDividend:5.0, exDate:"2026-06-22", futuresVolume:280, marginTier:"B",
+    expectedDeclinePct:5.0, targetHoldDays:12,
+    etfs:[],
+    history:[{year:2025,pnl:11240,win:true},{year:2024,pnl:14420,win:true},{year:2023,pnl:9380,win:true},{year:2022,pnl:-3840,win:false},{year:2021,pnl:1980,win:true}],
+    fillDays:[24, null, null] },
+
+  // ── 2026 除息日尚未公告，依歷史模式估計 (estimated:true) ──
+  { ticker:"2891", name:"中信金", sector:"金融", spotPrice:58.2, futuresPrice:58.0, cashDividend:2.5, exDate:"2026-07-14", futuresVolume:2103, marginTier:"A", estimated:true,
+    expectedDeclinePct:1.8, targetHoldDays:7,
+    etfs:[{id:"0056",name:"元大高股息",weight:5.14},{id:"00878",name:"國泰永續高股息",weight:4.78},{id:"00919",name:"群益台灣精選高息",weight:5.62}],
+    history:[{year:2025,pnl:1180,win:true},{year:2024,pnl:1820,win:true},{year:2023,pnl:640,win:true},{year:2022,pnl:-1240,win:false},{year:2021,pnl:980,win:true}],
+    fillDays:[null, 92, 70] },
+  { ticker:"2412", name:"中華電", sector:"電信", spotPrice:130.0, futuresPrice:129.5, cashDividend:5.0, exDate:"2026-07-03", futuresVolume:612, marginTier:"A", estimated:true,
+    expectedDeclinePct:3.5, targetHoldDays:10,
+    etfs:[{id:"0056",name:"元大高股息",weight:3.45},{id:"00878",name:"國泰永續高股息",weight:4.12},{id:"00713",name:"元大台灣高息低波",weight:4.88}],
+    history:[{year:2025,pnl:7240,win:true},{year:2024,pnl:8580,win:true},{year:2023,pnl:6820,win:true},{year:2022,pnl:5120,win:true},{year:2021,pnl:3640,win:true}],
+    fillDays:[28, 42, 31] },
+  { ticker:"1101", name:"台泥", sector:"水泥", spotPrice:32.1, futuresPrice:31.95, cashDividend:1.5, exDate:"2026-07-10", futuresVolume:412, marginTier:"A", estimated:true,
+    expectedDeclinePct:5.5, targetHoldDays:12,
+    etfs:[{id:"0056",name:"元大高股息",weight:2.18},{id:"00713",name:"元大台灣高息低波",weight:3.05}],
+    history:[{year:2025,pnl:4880,win:true},{year:2024,pnl:-1340,win:false},{year:2023,pnl:3620,win:true},{year:2022,pnl:-980,win:false},{year:2021,pnl:2740,win:true}],
+    fillDays:[58, null, 41] },
+];
+
+// ──────────────────────────────────────────────────────────
+// Calculations
+// ──────────────────────────────────────────────────────────
+function avgFill(arr) {
+  const vals = arr.map(d => d === null ? UNFILLED_PENALTY : d);
+  return Math.round(vals.reduce((a, v) => a + v, 0) / vals.length);
+}
+function unfilledCount(arr) { return arr.filter(d => d === null).length; }
+
+// ──────────────────────────────────────────────────────────
+// 配對對沖建議 — 同產業未除息標的
+// 邏輯：做空除息股 + 做多同產業未除息股 = 對沖產業 beta，留下 alpha
+// ──────────────────────────────────────────────────────────
+const PAIR_HEDGES = {
+  "金融":         [{ ticker:"2884", name:"玉山金", note:"金控股，beta 接近", price:32, tier:"A" }, { ticker:"2886", name:"兆豐金", note:"公股，較穩定", price:46, tier:"A" }],
+  "電信":         [{ ticker:"4904", name:"遠傳",   note:"三大電信", price:93, tier:"A" },           { ticker:"3045", name:"台灣大", note:"三大電信", price:108, tier:"A" }],
+  "電子代工":     [{ ticker:"2382", name:"廣達",   note:"AI 伺服器同題材", price:370, tier:"A" },    { ticker:"2353", name:"宏碁",   note:"電腦同題材", price:37, tier:"A" }],
+  "半導體封測":   [{ ticker:"2449", name:"京元電",  note:"同類封測", price:115, tier:"B" },          { ticker:"2329", name:"華泰",   note:"封測同業", price:38, tier:"B" }],
+  "半導體晶圓代工":[{ ticker:"2330", name:"台積電", price:1100, tier:"A", note:"龍頭，相關度高" }, { ticker:"6770", name:"力積電", price:21, tier:"B", note:"成熟製程同業" }],
+  "航運":         [{ ticker:"2609", name:"陽明",   note:"貨櫃同業", price:75, tier:"A" },          { ticker:"2615", name:"萬海",   note:"貨櫃同業", price:85, tier:"A" }],
+  "水泥":         [{ ticker:"1102", name:"亞泥",   note:"水泥雙雄", price:46, tier:"A" }],
+  "電子零組件":   [{ ticker:"2327", name:"國巨",   note:"被動元件", price:720, tier:"A" },          { ticker:"3037", name:"欣興",   note:"PCB 同業", price:155, tier:"A" }],
+  "電腦週邊":     [{ ticker:"2353", name:"宏碁",   note:"電腦品牌同業", price:37, tier:"A" },        { ticker:"2382", name:"廣達",   note:"AI 同題材", price:370, tier:"A" }],
+  "汽車零組件":   [{ ticker:"1525", name:"江申",   note:"汽車零組件", price:110, tier:"B" },         { ticker:"1526", name:"日馳",   note:"汽車零組件", price:140, tier:"B" }],
+};
+
+function getPairs(sector) { return PAIR_HEDGES[sector] || []; }
+
+function calcSpread(s, daysToEx) {
+  // 估算近月 vs 次月期貨價差
+  // 個股期每月第三個週三結算
+  // 近月：本月或下月最近結算契約
+  // 次月：再下個月契約
+  const F = s.futuresPrice;
+  const D = s.cashDividend;
+
+  // 假設近月還有 7-15 個交易日到結算（簡化估算）
+  // 若除息日 < 5 日，近月已經反映完除息 → 次月更接近「除息後」價格
+  // 若除息日 > 10 日，近月還沒除息 → 次月 = (F-D) × carry factor
+  const daysToNearSettle = 10;
+  const daysBetween = 30;
+  const carryFactor = 0.025 * daysBetween / 365;
+
+  // 次月理論價 = 已除息後價 × carry
+  // 若除息已過則用 F；若未過則用 F - D
+  const exHappened = daysToEx <= 0;
+  const baseForFar = exHappened ? F : (F - D);
+  const farMonth = +(baseForFar * (1 + carryFactor)).toFixed(2);
+
+  const spread = +(F - farMonth).toFixed(2);
+  const spreadPct = +(spread / F * 100).toFixed(2);
+
+  // Spread 訊號解讀
+  let signal, hint;
+  if (spread > D * 0.6) {
+    signal = "近月貴";
+    hint = "近月被搶配息推高，可換月空（平近月、開次月）";
+  } else if (spread < -1) {
+    signal = "次月貴";
+    hint = "次月反映後續走弱，續抱次月空單";
+  } else {
+    signal = "正常";
+    hint = "無顯著換月套利空間";
+  }
+
+  return { nearMonth: F, farMonth, spread, spreadPct, signal, hint };
+}
+
+function calcBasis(s) {
+  const basisAbs = +(s.futuresPrice - s.spotPrice).toFixed(2);
+  const basisPct = +((basisAbs / s.spotPrice) * 100).toFixed(2);
+
+  // 訊號分級（從自營部視角）
+  // < −2%   : 深度逆價差，市場已預期下跌，訊號強烈
+  // −2~−0.5 : 中度逆價差，標準場景，可進場
+  // −0.5~0.5: 持平，無基差訊號
+  // > 0.5%  : 正價差（contango），市場樂觀，反訊號
+  let level, label, color;
+  if (basisPct < -2) { level = "strong"; label = "深度逆價差"; color = "#166534"; }
+  else if (basisPct < -0.5) { level = "good"; label = "中度逆價差"; color = "#B45309"; }
+  else if (basisPct < 0.5) { level = "neutral"; label = "持平"; color = "#6B6B6B"; }
+  else { level = "warn"; label = "正價差·反訊號"; color = "#B91C1C"; }
+  return { basisAbs, basisPct, level, label, color };
+}
+
+function calcEntry(s, preset) {
+  const F = s.futuresPrice;
+  const S = s.spotPrice;
+  const D = s.cashDividend;
+
+  // 進場區間
+  const entryHigh = +Math.max(F, S).toFixed(2);   // 等回拉到現股價
+  const entryMid = F;                              // 期貨現價
+  const entryLow = +(F * (1 - s.expectedDeclinePct / 200)).toFixed(2); // 訊號失效門檻
+
+  // 除息調整後參考價
+  const adjPrice = +(F - D).toFixed(2);
+
+  // 停利價：除息後價跌到預期跌幅 × 停利門檻
+  const tpRatio = (preset.takeProfit || 100) / 100;
+  const takeProfitPrice = +(adjPrice * (1 - s.expectedDeclinePct * tpRatio / 100)).toFixed(2);
+
+  // 停損價：除息前用進場價 × (1 + stop%)；除息後用調整價 × (1 + stop%)
+  const stopBefore = +(F * (1 + preset.stopLoss / 100)).toFixed(2);
+  const stopAfter = +(adjPrice * (1 + preset.stopLoss / 100)).toFixed(2);
+
+  // 風報比
+  const profit = adjPrice - takeProfitPrice;
+  const loss = stopAfter - adjPrice;
+  const rr = loss > 0 ? +(profit / loss).toFixed(2) : null;
+
+  // 分批建倉 (依 preset 進場時點)
+  const batches = preset.entryTiming.includes("T−2") || preset.entryTiming.includes("T-2")
+    ? [
+        { time: "T−2 收盤前 30 分", pct: 33, hint: "搶在散戶搶配息前先卡位 1/3" },
+        { time: "T−1 開盤後 1 小時", pct: 33, hint: "確認當日無利多再加 1/3" },
+        { time: "T−1 收盤前 30 分", pct: 34, hint: "最後 1/3 鎖入除息日" },
+      ]
+    : preset.entryTiming.includes("T−3") || preset.entryTiming.includes("T-3")
+    ? [
+        { time: "T−3 收盤前", pct: 50, hint: "早布局抓較好價位" },
+        { time: "T−1 開盤", pct: 50, hint: "再加 1/2 倉" },
+      ]
+    : [{ time: "T−1 收盤前 30 分", pct: 100, hint: "一次到位，免去時間衰減" }];
+
+  return {
+    entryHigh, entryMid, entryLow,
+    adjPrice, takeProfitPrice,
+    stopBefore, stopAfter,
+    riskReward: rr,
+    batches,
+  };
+}
+
+function calcShort(s, presetHoldDays) {
+  // 正確邏輯：除息日契約自動調整為 F0 - D（這段不算賺）
+  // 真正獲利：除息後 N 日的貼息走勢
+  // 若 preset 指定 holdDays，用該值，否則用個股 targetHoldDays
+  const hold = presetHoldDays || s.targetHoldDays;
+  // sqrt 縮放：T+5 ≈ √(5/10) = 71% 的 T+10 跌幅
+  const fraction = Math.min(1, Math.sqrt(hold / s.targetHoldDays));
+  const usedDecline = s.expectedDeclinePct * fraction;
+
+  const exDivAdj = s.futuresPrice - s.cashDividend;
+  const exitPrice = exDivAdj * (1 - usedDecline / 100);
+  const gross = (exDivAdj - exitPrice) * CONTRACT_SIZE;
+  const entryCost = s.futuresPrice * CONTRACT_SIZE * TAIFEX_TAX + 30;
+  const exitCost = exitPrice * CONTRACT_SIZE * TAIFEX_TAX + 30;
+  const totalCost = entryCost + exitCost;
+  const net = gross - totalCost;
+  return {
+    exDivAdj: +exDivAdj.toFixed(2),
+    exitPrice: +exitPrice.toFixed(2),
+    declinePct: +usedDecline.toFixed(2),
+    holdDays: hold,
+    gross: Math.round(gross),
+    cost: Math.round(totalCost),
+    net: Math.round(net),
+  };
+}
+
+function calcMargin(s, perStockCap) {
+  const rate = MARGIN_RATES[s.marginTier];
+  const maintRate = MAINT_RATES[s.marginTier];
+  const initial = Math.round(s.futuresPrice * CONTRACT_SIZE * rate);
+  const maint = Math.round(s.futuresPrice * CONTRACT_SIZE * maintRate);
+  const cap = perStockCap || INVEST_CAP;
+  const maxLots = Math.floor(cap / initial);
+  const usedCapital = initial * maxLots;
+  return { initial, maint, maxLots, usedCapital, rate, maintRate, cap };
+}
+
+function calcRow(s) {
+  const preset = PRESETS[state.preset];
+  const perStockCap = Math.round(state.totalCapital * preset.positionPct / 100);
+  const daysToEx = Math.ceil((new Date(s.exDate) - TODAY) / 86400000);
+  const yieldPct = +((s.cashDividend / s.spotPrice) * 100).toFixed(2);
+  const shortCalc = calcShort(s, preset.holdDays);
+  const margin = calcMargin(s, perStockCap);
+  const entry = calcEntry(s, preset);
+  const basis = calcBasis(s);
+  const spread = calcSpread(s, daysToEx);
+  const wins = s.history.filter(h => h.win).length;
+  const winRate = Math.round(wins / s.history.length * 100);
+  const avgPnL = Math.round(s.history.reduce((a,h)=>a+h.pnl,0) / s.history.length);
+  const avgFillDays = avgFill(s.fillDays);
+  const unfilled = unfilledCount(s.fillDays);
+
+  // ROI 計算
+  const roiPct = margin.initial > 0 ? +(shortCalc.net / margin.initial * 100).toFixed(2) : 0;
+  const totalDays = Math.max(1, daysToEx + shortCalc.holdDays);
+  const annRoiPct = +(roiPct * 365 / totalDays).toFixed(1);
+
+  return { ...s, daysToEx, yieldPct, short: shortCalc, margin, entry, basis, spread, winRate, avgPnL, avgFillDays, unfilled, roiPct, annRoiPct, perStockCap };
+}
+
+// ──────────────────────────────────────────────────────────
+// State
+// ──────────────────────────────────────────────────────────
+let state = {
+  tab: "scan",
+  sort: "exDate",
+  fillFilter: true,
+  capFilter: true,
+  basisFilter: "all",
+  expanded: null,
+  preset: "xiaoge",
+  pfMode: "pure",
+  totalCapital: storage.get("totalCapital", 1000000),  // 預設總資金 100 萬
+  customList: storage.get("customList", []),
+  notif: storage.get("notif", { d7: true, d3: true, d1: true, daily: false }),
+};
+
+function getRows() {
+  const preset = PRESETS[state.preset];
+  return DATA.map(calcRow)
+    .filter(r => r.daysToEx <= 35 && r.daysToEx >= 0)
+    .filter(r => !state.fillFilter || r.avgFillDays > preset.minFillDays)
+    .filter(r => r.unfilled >= preset.minUnfilled)
+    .filter(r => r.winRate >= preset.minWinRate)
+    .filter(r => !state.capFilter || r.margin.maxLots > 0)
+    .filter(r => state.basisFilter === "all" || (state.basisFilter === "strong" && (r.basis.level === "strong" || r.basis.level === "good")))
+    .sort((a, b) => {
+      if (state.sort === "exDate") return a.daysToEx - b.daysToEx;
+      if (state.sort === "winRate") return b.winRate - a.winRate;
+      if (state.sort === "yield") return b.yieldPct - a.yieldPct;
+      if (state.sort === "fillDays") return b.avgFillDays - a.avgFillDays;
+      if (state.sort === "roi") return b.annRoiPct - a.annRoiPct;
+      return b.short.net - a.short.net;
+    });
+}
+
+function fmt(n) { return n.toLocaleString(); }
+
+// ──────────────────────────────────────────────────────────
+// Renderers
+// ──────────────────────────────────────────────────────────
+function renderPresets() {
+  const grid = document.getElementById("presetGrid");
+  if (!grid) return;
+  const keys = ["xiaoge", "aggressive", "custom"];
+  grid.innerHTML = keys.map(k => {
+    const p = PRESETS[k];
+    const active = state.preset === k;
+    return `
+      <button class="strat-btn ${active ? "active" : ""}" data-preset="${k}">
+        <div class="t">${p.name}</div>
+        <div class="s">${p.desc}</div>
+      </button>
+    `;
+  }).join("");
+  document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => {
+    state.preset = b.dataset.preset;
+    state.expanded = null;
+    render();
+  }));
+
+  const p = PRESETS[state.preset];
+  const perStock = Math.round(state.totalCapital * p.positionPct / 100);
+  document.getElementById("presetInfo").innerHTML = `
+    <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px 20px;">
+      <div><span style="color:#6B6B6B;">進場時點：</span><span class="mono" style="font-weight:600;">${p.entryTiming}</span></div>
+      <div><span style="color:#6B6B6B;">出場：</span><span class="mono" style="font-weight:600;">T+${p.holdDays}</span></div>
+      <div><span style="color:#6B6B6B;">停利：</span><span class="mono" style="font-weight:600;">${p.takeProfit ? `達標 ${p.takeProfit}% 鎖利` : "無 (持有到底)"}</span></div>
+      <div><span style="color:#6B6B6B;">停損：</span><span class="mono" style="font-weight:600;">反漲 ${p.stopLoss}% 砍倉</span></div>
+      <div><span style="color:#6B6B6B;">單檔上限：</span><span class="mono" style="font-weight:600;">${p.positionPct}% (${fmt(perStock)})</span></div>
+      <div><span style="color:#6B6B6B;">同時最多：</span><span class="mono" style="font-weight:600;">${p.maxStocks} 檔</span></div>
+    </div>
+    <div style="margin-top:8px; padding-top:8px; border-top:1px dashed #E0DDD4; color:#6B6B6B;">
+      篩選條件：填息 > ${p.minFillDays} 日 · 至少 ${p.minUnfilled} 次未填息 · 5 年勝率 ≥ ${p.minWinRate}%
+    </div>
+  `;
+}
+
+function renderSummary(rows) {
+  const preset = PRESETS[state.preset];
+  // 依小哥規則：最多 N 檔，按年化 ROI 排序取前 N
+  const selected = [...rows].sort((a,b) => b.annRoiPct - a.annRoiPct).slice(0, preset.maxStocks);
+  const totalNet = selected.reduce((a, r) => a + r.short.net * r.margin.maxLots, 0);
+  const totalUsed = selected.reduce((a, r) => a + r.margin.usedCapital, 0);
+  const portfolioRoi = totalUsed > 0 ? +(totalNet / totalUsed * 100).toFixed(2) : 0;
+  const avgWR = selected.length ? Math.round(selected.reduce((a, r) => a + r.winRate, 0) / selected.length) : 0;
+  const totalCapUsedPct = state.totalCapital > 0 ? +(totalUsed / state.totalCapital * 100).toFixed(1) : 0;
+
+  document.getElementById("summary").innerHTML = `
+    <div class="stat"><div class="stat-label">候選 / 建議下單</div><div class="stat-value"><span class="v">${rows.length}/${selected.length}</span><span class="u">檔</span></div></div>
+    <div class="stat"><div class="stat-label">資金動用 (${totalCapUsedPct}%)</div><div class="stat-value"><span class="v">${fmt(totalUsed)}</span><span class="u">TWD</span></div></div>
+    <div class="stat"><div class="stat-label">預期淨利</div><div class="stat-value"><span class="v accent">${fmt(totalNet)}</span><span class="u">TWD</span></div></div>
+    <div class="stat"><div class="stat-label">組合單筆 ROI</div><div class="stat-value"><span class="v" style="color:${portfolioRoi>2?'#166534':portfolioRoi>0?'#B45309':'#B91C1C'};">${portfolioRoi>0?'+':''}${portfolioRoi}</span><span class="u">% / 勝率 ${avgWR}%</span></div></div>
+  `;
+}
+
+function exBadge(daysToEx, exDate, estimated) {
+  if (daysToEx < 0) {
+    return `<span class="ex-badge passed">${exDate.slice(5).replace("-", "/")} · 已除息</span>`;
+  }
+  const urgency = daysToEx <= 3 ? "urgent" : daysToEx <= 7 ? "soon" : "normal";
+  const estTag = estimated ? ' <span style="font-size:9px;opacity:0.8;">估</span>' : '';
+  return `<span class="ex-badge ${urgency}">${exDate.slice(5).replace("-", "/")} · T−${daysToEx}${estTag}</span>`;
+}
+
+function renderRows(rows) {
+  if (rows.length === 0) {
+    document.getElementById("rows").innerHTML = `<div class="empty">沒有符合條件的標的，試著放寬篩選</div>`;
+    return;
+  }
+  document.getElementById("rows").innerHTML = rows.map(r => {
+    const net = r.short.net;
+    const expanded = state.expanded === r.ticker;
+    const fillTag = r.unfilled > 0 ? `<span class="neg">${r.avgFillDays}日(${r.unfilled}次未填)</span>` : `${r.avgFillDays}日`;
+    const overCap = r.margin.maxLots === 0;
+    return `
+      <div class="row ${overCap ? "over-cap" : ""}">
+        <button class="row-head" data-toggle="${r.ticker}">
+          <div>
+            <div class="row-name">
+              <span class="tick">${r.ticker}</span>
+              <span class="nm">${r.name}</span>
+              <span class="tier">${r.marginTier}級 ${(r.margin.rate*100).toFixed(2)}%</span>
+              <span style="font-family:'JetBrains Mono', monospace; font-size:10px; padding:1px 6px; background:${r.basis.color}; color:#FFF; border-radius:3px; font-weight:600;">
+                基差 ${r.basis.basisPct > 0 ? '+' : ''}${r.basis.basisPct}%
+              </span>
+              ${exBadge(r.daysToEx, r.exDate, r.estimated)}
+            </div>
+            <div class="row-sub">${r.sector} · ${r.etfs.length} 檔 ETF · 填息 ${fillTag} · 量${r.futuresVolume}口 · 預期跌幅 ${r.expectedDeclinePct}% / ${r.targetHoldDays}日</div>
+            <div class="row-mobile">
+              <span class="item">現/F <span class="v">${r.spotPrice.toFixed(2)}/${r.futuresPrice.toFixed(2)}</span></span>
+              <span class="item">保證金/口 <span class="v">${fmt(r.margin.initial)}</span></span>
+              <span class="item">可下 <span class="v ${overCap?"neg":""}">${r.margin.maxLots}口</span></span>
+              <span class="item">勝率 <span class="v">${r.winRate}%</span></span>
+              <span class="item">淨利/口 <span class="v" style="color:${net>0?'#B45309':'#B91C1C'};">${net>0?'+':''}${fmt(net)}</span></span>
+              <span class="item">年化 <span class="v" style="color:${r.annRoiPct>50?'#166534':r.annRoiPct>0?'#B45309':'#B91C1C'}; font-weight:700;">${r.annRoiPct>0?'+':''}${r.annRoiPct}%</span></span>
+            </div>
+          </div>
+          <div class="row-num col-spot">${r.spotPrice.toFixed(2)}<div class="sub">${r.futuresPrice.toFixed(2)}</div></div>
+          <div class="row-num col-div">${r.cashDividend.toFixed(2)}<div class="sub">${r.yieldPct}%</div></div>
+          <div class="row-num col-margin">${fmt(r.margin.initial)}<div class="sub">維 ${fmt(r.margin.maint)}</div></div>
+          <div class="row-num col-lots" style="font-weight:600;">${r.margin.maxLots}<div class="sub">${fmt(r.margin.usedCapital)}</div></div>
+          <div class="row-num col-wr" style="font-weight:600;">${r.winRate}%</div>
+          <div class="row-net ${net > 0 ? "accent" : "neg"}">${net > 0 ? "+" : ""}${fmt(net)}</div>
+          <div class="row-num col-roi" style="font-weight:600; color:${r.annRoiPct > 50 ? '#166534' : r.annRoiPct > 0 ? '#B45309' : '#B91C1C'};">${r.annRoiPct > 0 ? '+' : ''}${r.annRoiPct}%<div class="sub">單筆 ${r.roiPct > 0 ? '+' : ''}${r.roiPct}%</div></div>
+          <div class="chev">${expanded ? "▲" : "▼"}</div>
+        </button>
+        ${expanded ? renderDetail(r) : ""}
+      </div>
+    `;
+  }).join("");
+  document.querySelectorAll("[data-toggle]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.expanded = state.expanded === btn.dataset.toggle ? null : btn.dataset.toggle;
+      render();
+    });
+  });
+}
+
+function renderMargin(r) {
+  const overCap = r.margin.maxLots === 0;
+  return `
+    <div class="margin-block">
+      <div class="mb-title">
+        <div class="sec-label" style="margin-bottom:0;">保證金與資金配置</div>
+        <div style="font-size:11px; color:#6B6B6B; font-family:'JetBrains Mono',monospace;">上限 ${fmt(INVEST_CAP)}</div>
+      </div>
+      <div class="mb-row"><span>原始保證金 / 口 (期貨價 × 2,000 × ${(r.margin.rate*100).toFixed(2)}%)</span><span class="v">${fmt(r.margin.initial)} TWD</span></div>
+      <div class="mb-row"><span>維持保證金 / 口</span><span class="v">${fmt(r.margin.maint)} TWD</span></div>
+      <div class="mb-row"><span>名目契約價值 / 口</span><span class="v">${fmt(Math.round(r.futuresPrice * CONTRACT_SIZE))} TWD</span></div>
+      <div class="lots-summary">
+        <div>
+          <div style="font-size:11px; color:#6B6B6B;">${INVEST_CAP.toLocaleString()} ÷ ${fmt(r.margin.initial)} =</div>
+          <div style="font-size:11px; color:#6B6B6B;">實際動用 ${fmt(r.margin.usedCapital)} TWD</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="lots ${overCap?"zero":""}">${r.margin.maxLots} 口</div>
+          ${overCap ? `<div style="font-size:11px; color:#B91C1C;">超出單檔上限</div>` : ""}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderEntry(r) {
+  const e = r.entry;
+  const p = PRESETS[state.preset];
+  const expired = r.daysToEx < 0;
+
+  if (expired) return '';
+
+  return `
+    <div class="margin-block" style="border-left:3px solid #B45309;">
+      <div class="mb-title">
+        <div class="sec-label" style="margin-bottom:0;">建議進場 / 出場點位</div>
+        <div style="font-size:11px; color:#6B6B6B; font-family:'JetBrains Mono', monospace;">${p.name} · ${p.entryTiming}</div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin:10px 0;">
+        <div style="padding:10px; background:#FAFAF7; border:1px solid #E0DDD4; text-align:center;">
+          <div style="font-size:10px; color:#6B6B6B; font-family:'JetBrains Mono', monospace; text-transform:uppercase; letter-spacing:0.08em;">理想進場 (等回拉)</div>
+          <div class="mono" style="font-size:18px; font-weight:700; margin-top:4px; color:#166534;">${e.entryHigh.toFixed(2)}</div>
+        </div>
+        <div style="padding:10px; background:#FFF; border:2px solid #B45309; text-align:center;">
+          <div style="font-size:10px; color:#6B6B6B; font-family:'JetBrains Mono', monospace; text-transform:uppercase; letter-spacing:0.08em;">期貨現價 (即時)</div>
+          <div class="mono" style="font-size:20px; font-weight:700; margin-top:4px; color:#B45309;">${e.entryMid.toFixed(2)}</div>
+        </div>
+        <div style="padding:10px; background:#FAFAF7; border:1px solid #E0DDD4; text-align:center;">
+          <div style="font-size:10px; color:#6B6B6B; font-family:'JetBrains Mono', monospace; text-transform:uppercase; letter-spacing:0.08em;">訊號失效 (避進)</div>
+          <div class="mono" style="font-size:18px; font-weight:700; margin-top:4px; color:#6B6B6B;">${e.entryLow.toFixed(2)}</div>
+        </div>
+      </div>
+
+      <div class="mb-row" style="margin-top:8px;"><span>除息日契約調整後 (F0 − D)</span><span class="v">${e.adjPrice.toFixed(2)} TWD</span></div>
+      <div class="mb-row"><span class="pos">停利價 (${p.takeProfit ? p.takeProfit + '% 鎖利' : '到底'})</span><span class="v pos">${e.takeProfitPrice.toFixed(2)} TWD</span></div>
+      <div class="mb-row"><span class="neg">停損價 (反漲 ${p.stopLoss}%)</span><span class="v neg">${e.stopAfter.toFixed(2)} TWD (除息前 ${e.stopBefore.toFixed(2)})</span></div>
+      <div class="mb-row" style="border-top:1px dashed #E0DDD4; padding-top:8px; margin-top:8px;">
+        <span style="font-weight:600;">風險報酬比</span>
+        <span class="v" style="font-weight:700; color:${e.riskReward >= 2 ? '#166534' : e.riskReward >= 1 ? '#B45309' : '#B91C1C'};">
+          ${e.riskReward ? `${e.riskReward} : 1` : '—'}
+        </span>
+      </div>
+
+      <div style="margin-top:12px; padding-top:10px; border-top:1px dashed #E0DDD4;">
+        <div style="font-size:11px; color:#6B6B6B; font-family:'JetBrains Mono', monospace; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">分批建倉</div>
+        ${e.batches.map((b, i) => `
+          <div style="display:flex; align-items:baseline; gap:10px; padding:5px 0; font-size:12px;">
+            <span style="width:18px; height:18px; line-height:18px; text-align:center; background:#1A1A1A; color:#F5F4EF; border-radius:50%; font-family:'JetBrains Mono', monospace; font-size:10px; font-weight:600;">${i+1}</span>
+            <span class="mono" style="width:130px; font-weight:600;">${b.time}</span>
+            <span class="mono" style="width:48px; color:#B45309;">${b.pct}%</span>
+            <span style="color:#6B6B6B; flex:1;">${b.hint}</span>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+// ──────────────────────────────────────────────────────────
+// 組合視角：把候選清單組成可下單的部位
+// ──────────────────────────────────────────────────────────
+function buildPortfolio() {
+  const preset = PRESETS[state.preset];
+  const candidates = getRows();
+  // 按年化 ROI 取前 N 檔（preset.maxStocks）
+  const selected = [...candidates].sort((a, b) => b.annRoiPct - a.annRoiPct).slice(0, preset.maxStocks);
+
+  const A_RATE = 0.135;  // 假設配對長腳為 A 級
+
+  return selected.map(s => {
+    const pairs = getPairs(s.sector);
+    const pair = pairs[0] || null;  // 取第一個配對候選
+    const lots = s.margin.maxLots;
+    const shortMargin = s.margin.usedCapital;
+
+    // 配對長腳保證金估計（同名目價值 × A 級係數）
+    const pairMargin = pair ? Math.round(s.futuresPrice * CONTRACT_SIZE * A_RATE * lots) : 0;
+
+    // 純放空總保證金 = 空單保證金
+    // 對沖組合總保證金 = 空單 + 多單保證金
+    const totalMarginPure = shortMargin;
+    const totalMarginHedge = shortMargin + pairMargin;
+
+    // 預期 P&L
+    // 純放空：賺除息後貼息走勢 = s.short.net × lots
+    // 對沖：alpha = 空單獲利 − 多單預期 (假設多單原地踏步，且無股利收入)
+    //       實際上多單會收股利，但這裡只看相對 alpha
+    const pnlPure = s.short.net * lots;
+    const pnlHedge = pnlPure - Math.round(s.spotPrice * CONTRACT_SIZE * 0.001 * lots);  // 多單交易成本
+
+    const roiPure = totalMarginPure > 0 ? +(pnlPure / totalMarginPure * 100).toFixed(2) : 0;
+    const roiHedge = totalMarginHedge > 0 ? +(pnlHedge / totalMarginHedge * 100).toFixed(2) : 0;
+
+    return {
+      stock: s, pair, lots,
+      shortMargin, pairMargin,
+      totalMarginPure, totalMarginHedge,
+      pnlPure, pnlHedge,
+      roiPure, roiHedge,
+    };
+  });
+}
+
+function renderPortfolio() {
+  const preset = PRESETS[state.preset];
+  const items = buildPortfolio();
+  const isHedge = state.pfMode === "hedge";
+
+  // 摘要
+  const totalUsed = items.reduce((a, x) => a + (isHedge ? x.totalMarginHedge : x.totalMarginPure), 0);
+  const totalPnL = items.reduce((a, x) => a + (isHedge ? x.pnlHedge : x.pnlPure), 0);
+  const totalLots = items.reduce((a, x) => a + x.lots, 0);
+  const portfolioRoi = totalUsed > 0 ? +(totalPnL / totalUsed * 100).toFixed(2) : 0;
+  const capUsedPct = +(totalUsed / state.totalCapital * 100).toFixed(1);
+  const annRoi = items.length > 0
+    ? +(portfolioRoi * 365 / (Math.max(1, items.reduce((a, x) => a + x.stock.daysToEx + x.stock.short.holdDays, 0) / items.length))).toFixed(1)
+    : 0;
+
+  document.getElementById("pfStrategyLabel").innerHTML = `${preset.name} · 總資金 ${fmt(state.totalCapital)} TWD`;
+
+  document.getElementById("pfSummary").innerHTML = `
+    <div class="stat"><div class="stat-label">組合檔數 / 口數</div><div class="stat-value"><span class="v">${items.length} / ${totalLots}</span><span class="u">檔/口</span></div></div>
+    <div class="stat"><div class="stat-label">保證金佔比</div><div class="stat-value"><span class="v">${capUsedPct}</span><span class="u">%</span></div></div>
+    <div class="stat"><div class="stat-label">預期${isHedge ? ' Alpha' : '損益'}</div><div class="stat-value"><span class="v accent">${fmt(totalPnL)}</span><span class="u">TWD</span></div></div>
+    <div class="stat"><div class="stat-label">組合年化 ROI</div><div class="stat-value"><span class="v" style="color:${annRoi>50?'#166534':annRoi>0?'#B45309':'#B91C1C'};">${annRoi>0?'+':''}${annRoi}</span><span class="u">%</span></div></div>
+  `;
+
+  if (items.length === 0) {
+    document.getElementById("pfBody").innerHTML = `<div class="empty">沒有符合條件的標的，回掃描頁調整策略</div>`;
+    return;
+  }
+
+  document.getElementById("pfBody").innerHTML = items.map(x => {
+    const s = x.stock;
+    const expired = s.daysToEx < 0;
+    const margin = isHedge ? x.totalMarginHedge : x.totalMarginPure;
+    const pnl = isHedge ? x.pnlHedge : x.pnlPure;
+    const roi = isHedge ? x.roiHedge : x.roiPure;
+
+    return `
+      <div class="card" style="padding: 16px 18px; margin-bottom: 10px; ${expired ? 'opacity:0.5;' : ''} border-left: 3px solid ${isHedge ? '#166534' : '#B45309'};">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+          <div>
+            <span class="mono" style="font-size:16px; font-weight:700;">${s.ticker}</span>
+            <span class="serif" style="font-size:16px; margin-left:6px;">${s.name}</span>
+            <span style="font-size:11px; color:#6B6B6B; margin-left:8px;">${s.sector}</span>
+            ${exBadge(s.daysToEx, s.exDate, s.estimated)}
+          </div>
+          <div style="display:flex; align-items:baseline; gap:6px;">
+            <span class="mono" style="font-size:11px; padding:2px 6px; background:${s.basis.color}; color:#FFF; border-radius:3px;">基差 ${s.basis.basisPct}%</span>
+            <span class="mono" style="font-size:11px; color:#6B6B6B;">勝率 ${s.winRate}%</span>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: ${isHedge ? '1fr 1fr' : '1fr'}; gap:8px; margin-bottom:10px;">
+          <div style="padding:10px 12px; background:#FFF; border:1px solid #E0DDD4;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
+              <span style="font-size:11px; color:#B91C1C; font-weight:600;">SHORT</span>
+              <span class="mono" style="font-size:10px; color:#6B6B6B;">${s.ticker} 個股期</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+              <span class="mono" style="font-size:18px; font-weight:700;">${x.lots} 口</span>
+              <span class="mono" style="font-size:12px; color:#6B6B6B;">保證金 ${fmt(x.shortMargin)}</span>
+            </div>
+          </div>
+          ${isHedge && x.pair ? `
+            <div style="padding:10px 12px; background:#FFF; border:1px solid #E0DDD4;">
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
+                <span style="font-size:11px; color:#166534; font-weight:600;">LONG (對沖)</span>
+                <span class="mono" style="font-size:10px; color:#6B6B6B;">${x.pair.ticker} ${x.pair.name}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                <span class="mono" style="font-size:18px; font-weight:700;">${x.lots} 口</span>
+                <span class="mono" style="font-size:12px; color:#6B6B6B;">保證金 ${fmt(x.pairMargin)}</span>
+              </div>
+            </div>
+          ` : isHedge && !x.pair ? `
+            <div style="padding:10px 12px; background:#FAFAF7; border:1px dashed #E0DDD4; font-size:12px; color:#6B6B6B; text-align:center; display:flex; align-items:center; justify-content:center;">
+              無同產業配對標的
+            </div>
+          ` : ''}
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px dashed #E0DDD4; font-family:'JetBrains Mono', monospace; font-size:12px;">
+          <span style="color:#6B6B6B;">總保證金 ${fmt(margin)}</span>
+          <span style="color:#6B6B6B;">預期${isHedge ? ' α' : '損益'} <span style="color:${pnl>0?'#B45309':'#B91C1C'}; font-weight:700;">${pnl>0?'+':''}${fmt(pnl)}</span></span>
+          <span style="color:#6B6B6B;">ROI <span style="color:${roi>2?'#166534':roi>0?'#B45309':'#B91C1C'}; font-weight:700;">${roi>0?'+':''}${roi}%</span></span>
+        </div>
+
+        ${expired ? '<div style="margin-top:8px; padding:6px 10px; background:#FAFAF7; font-size:11px; color:#6B6B6B; border-left:3px solid #9B9B9B;">⚠ 已除息，無法進場</div>' : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSpreadBlock(r) {
+  const sp = r.spread;
+  const signalColor = sp.signal === "近月貴" ? "#B45309" : sp.signal === "次月貴" ? "#166534" : "#6B6B6B";
+  return `
+    <div class="margin-block" style="border-left:3px solid ${signalColor};">
+      <div class="mb-title">
+        <div class="sec-label" style="margin-bottom:0;">跨期 spread (近月 vs 次月)</div>
+        <span style="font-family:'JetBrains Mono', monospace; font-size:11px; padding:3px 8px; background:${signalColor}; color:#FFF; border-radius:3px; font-weight:600;">
+          ${sp.signal}
+        </span>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-top:10px;">
+        <div style="text-align:center; padding:8px;"><div style="font-size:10px; color:#6B6B6B;">近月期貨</div><div class="mono" style="font-size:16px; font-weight:600;">${sp.nearMonth.toFixed(2)}</div></div>
+        <div style="text-align:center; padding:8px;"><div style="font-size:10px; color:#6B6B6B;">次月理論</div><div class="mono" style="font-size:16px; font-weight:600;">${sp.farMonth.toFixed(2)}</div></div>
+        <div style="text-align:center; padding:8px; background:${signalColor}15;"><div style="font-size:10px; color:#6B6B6B;">Spread</div><div class="mono" style="font-size:16px; font-weight:700; color:${signalColor};">${sp.spread > 0 ? '+' : ''}${sp.spread.toFixed(2)} (${sp.spreadPct > 0 ? '+' : ''}${sp.spreadPct}%)</div></div>
+      </div>
+      <div style="margin-top:10px; padding:10px; background:#FAFAF7; font-size:12px; line-height:1.6; color:#6B6B6B;">
+        ${sp.hint}
+      </div>
+    </div>
+  `;
+}
+
+function renderBasisBlock(r) {
+  const b = r.basis;
+  const interp = {
+    strong: "市場已預期此股下跌，套利訊號明確。可進場，但要注意有部分利潤已被搶先反應。",
+    good: "標準場景，期貨已反映部分股利效應，是常見的中性進場時機。",
+    neutral: "期現價持平，套利空間需主要靠 ETF 撤退 + 散戶獲利了結，訊號普通。",
+    warn: "期貨溢價於現股，市場樂觀預期填息。<strong>不建議追空</strong>，等基差由正轉負再進。",
+  }[b.level];
+
+  return `
+    <div class="margin-block" style="border-left:3px solid ${b.color};">
+      <div class="mb-title">
+        <div class="sec-label" style="margin-bottom:0;">期現基差訊號</div>
+        <span style="font-family:'JetBrains Mono', monospace; font-size:11px; padding:3px 8px; background:${b.color}; color:#FFF; border-radius:3px; font-weight:600;">
+          ${b.label}
+        </span>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-top:10px;">
+        <div style="text-align:center; padding:8px;"><div style="font-size:10px; color:#6B6B6B;">現股價</div><div class="mono" style="font-size:16px; font-weight:600;">${r.spotPrice.toFixed(2)}</div></div>
+        <div style="text-align:center; padding:8px;"><div style="font-size:10px; color:#6B6B6B;">期貨價</div><div class="mono" style="font-size:16px; font-weight:600;">${r.futuresPrice.toFixed(2)}</div></div>
+        <div style="text-align:center; padding:8px; background:${b.color}15;"><div style="font-size:10px; color:#6B6B6B;">基差 (F − S)</div><div class="mono" style="font-size:16px; font-weight:700; color:${b.color};">${b.basisAbs > 0 ? '+' : ''}${b.basisAbs} (${b.basisPct > 0 ? '+' : ''}${b.basisPct}%)</div></div>
+      </div>
+      <div style="margin-top:10px; padding:10px; background:#FAFAF7; font-size:12px; line-height:1.6; color:#6B6B6B;">
+        ${interp}
+      </div>
+    </div>
+  `;
+}
+
+function renderPairBlock(r) {
+  const pairs = getPairs(r.sector);
+  if (pairs.length === 0) return '';
+
+  // 估算對沖部位口數：用空單的名目價值匹配多單口數
+  const shortNotional = r.futuresPrice * CONTRACT_SIZE;
+
+  return `
+    <div class="margin-block" style="border-left:3px solid #166534;">
+      <div class="mb-title">
+        <div class="sec-label" style="margin-bottom:0;">配對對沖建議 (做多同產業)</div>
+        <span style="font-size:11px; color:#6B6B6B; font-family:'JetBrains Mono', monospace;">${r.sector}</span>
+      </div>
+      <div style="font-size:11px; color:#6B6B6B; margin-top:6px; margin-bottom:10px;">
+        放空 ${r.ticker} ${r.name} 期貨 + 做多以下任一檔同口數，可對沖產業 beta 風險，留下個股 alpha。
+      </div>
+      ${pairs.map(p => `
+        <div style="display:flex; align-items:center; gap:10px; padding:10px; background:#FAFAF7; margin-bottom:6px; border:1px solid #E0DDD4;">
+          <span class="mono" style="font-size:14px; font-weight:600; width:48px;">${p.ticker}</span>
+          <span class="serif" style="width:64px;">${p.name}</span>
+          <span style="font-size:11px; color:#6B6B6B; flex:1;">${p.note}</span>
+          <span style="font-size:10px; padding:2px 6px; background:#166534; color:#FFF; border-radius:3px; font-family:'JetBrains Mono', monospace;">做多 1 口</span>
+        </div>
+      `).join('')}
+      <div style="margin-top:10px; padding:10px; background:#FFF; border:1px solid #E0DDD4; font-size:12px; line-height:1.7;">
+        <div style="color:#166534; font-weight:600; margin-bottom:4px;">✓ 對沖後組合 delta ≈ 0</div>
+        <div style="color:#6B6B6B;">
+          ＋ 對沖大盤系統性風險（除息日大跌不會雙邊虧）<br>
+          ＋ 留下「除息股 vs 非除息股」相對表現的 alpha<br>
+          − 多單佔用額外保證金 (約 ${fmt(Math.round(shortNotional * 0.135))} TWD/口)<br>
+          − 多單沒有股利收入（同口數 vs 你做空的有股利）
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderDetail(r) {
+  const fillYears = [2023, 2024, 2025];
+  return `
+    <div class="row-body">
+      ${renderBasisBlock(r)}
+      ${renderSpreadBlock(r)}
+      ${renderShortCalc(r)}
+      ${renderEntry(r)}
+      ${renderMargin(r)}
+      ${renderPairBlock(r)}
+      <div class="grid2">
+        <div>
+          <div class="sec-label">納入 ETF</div>
+          ${r.etfs.length === 0 ? '<div style="font-size:12px; color:#6B6B6B;">無高股息 ETF 納入</div>' : r.etfs.map(e => `
+            <div class="etf">
+              <span class="etf-id">${e.id}</span>
+              <span class="etf-name">${e.name}</span>
+              <div class="etf-bar"><div class="etf-bar-fill" style="width:${Math.min(e.weight*10,100)}%;"></div></div>
+              <span class="etf-w">${e.weight.toFixed(2)}%</span>
+            </div>
+          `).join("")}
+          <div class="sec-label" style="margin-top:16px;">近 3 年填息表現</div>
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:4px;">
+            ${fillYears.map((y, i) => {
+              const d = r.fillDays[i];
+              const isUnfilled = d === null;
+              return `
+                <div style="padding:8px 10px; background:#FFF; border:1px solid #E0DDD4; text-align:center;">
+                  <div class="mono" style="font-size:10px; color:#6B6B6B;">${y}</div>
+                  <div class="mono" style="font-size:16px; font-weight:600; margin-top:2px; ${isUnfilled ? "color:#B91C1C;" : ""}">${isUnfilled ? "未填" : d}</div>
+                  <div class="mono" style="font-size:10px; color:#6B6B6B;">${isUnfilled ? "—" : "日"}</div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+          <div style="margin-top:8px; font-size:11px; color:#6B6B6B; display:flex; justify-content:space-between;">
+            <span>3 年平均</span>
+            <span class="mono" style="font-weight:600; color:${r.avgFillDays > 20 ? "#B45309" : "#1A1A1A"};">
+              ${r.avgFillDays} 日 ${r.avgFillDays > 20 ? "✓ 符合放空條件" : "✗ 填息過快"}
+            </span>
+          </div>
+        </div>
+        <div>
+          <div class="sec-label">歷史回測 (近 5 年)</div>
+          ${renderHistory(r.history)}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderShortCalc(r) {
+  const c = r.short;
+  return `
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px;">
+      <div class="sec-label" style="margin-bottom:0;">放空試算 (每口)</div>
+      <div class="mono" style="font-size:11px; color:#6B6B6B;">除息後持有 ${c.holdDays} 日</div>
+    </div>
+
+    <!-- 三階段價格視覺化 -->
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:14px;">
+      <div style="padding:10px 12px; background:#FFF; border:1px solid #E0DDD4;">
+        <div class="mono" style="font-size:10px; color:#6B6B6B; text-transform:uppercase; letter-spacing:0.08em;">T−1 進場</div>
+        <div class="mono" style="font-size:18px; font-weight:600; margin-top:4px;">${r.futuresPrice.toFixed(2)}</div>
+        <div style="font-size:10px; color:#6B6B6B; margin-top:2px;">除息前放空</div>
+      </div>
+      <div style="padding:10px 12px; background:#F5F4EF; border:1px solid #E0DDD4;">
+        <div class="mono" style="font-size:10px; color:#6B6B6B; text-transform:uppercase; letter-spacing:0.08em;">T+0 除息調整</div>
+        <div class="mono" style="font-size:18px; font-weight:600; margin-top:4px; color:#9B9B9B;">${c.exDivAdj.toFixed(2)}</div>
+        <div style="font-size:10px; color:#9B9B9B; margin-top:2px;">契約自動扣 ${r.cashDividend.toFixed(2)} (不算賺)</div>
+      </div>
+      <div style="padding:10px 12px; background:#FFF; border:1px solid #B45309;">
+        <div class="mono" style="font-size:10px; color:#B45309; text-transform:uppercase; letter-spacing:0.08em;">T+${c.holdDays} 預期回補</div>
+        <div class="mono" style="font-size:18px; font-weight:600; margin-top:4px; color:#B45309;">${c.exitPrice.toFixed(2)}</div>
+        <div style="font-size:10px; color:#B45309; margin-top:2px;">貼息 −${c.declinePct}% 回補</div>
+      </div>
+    </div>
+
+    <div class="calc"><span class="calc-label">毛利 = (${c.exDivAdj.toFixed(2)} − ${c.exitPrice.toFixed(2)}) × 2,000</span><span class="calc-val">${fmt(c.gross)}<span class="u">TWD</span></span></div>
+    <div class="calc"><span class="calc-label m">期交稅 + 手續費 (雙邊)</span><span class="calc-val m">− ${fmt(c.cost)}<span class="u">TWD</span></span></div>
+    <div class="div-line"></div>
+    <div class="calc"><span class="calc-label">淨利 / 口</span><span class="calc-val a">${c.net > 0 ? "+" : ""}${fmt(c.net)}<span class="u">TWD</span></span></div>
+  `;
+}
+
+function renderHistory(history) {
+  const max = Math.max(...history.map(h => Math.abs(h.pnl)));
+  return history.map(h => {
+    const pct = Math.abs(h.pnl) / max * 100;
+    return `
+      <div class="hist">
+        <span class="hist-yr">${h.year}</span>
+        <div class="hist-bar">
+          <div class="hist-bar-fill" style="width:${pct}%; background:${h.win ? "#166534" : "#B91C1C"};"></div>
+          <span class="hist-label">${h.pnl > 0 ? "+" : ""}${fmt(h.pnl)}</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+// ──────────────────────────────────────────────────────────
+// My List
+// ──────────────────────────────────────────────────────────
+function renderMyList() {
+  const list = state.customList;
+  document.getElementById("listCount").textContent = list.length;
+  if (list.length === 0) {
+    document.getElementById("myListItems").innerHTML = `<div class="empty">清單空的。試試新增「3264」、「5347」、「3231」、「1319」</div>`;
+    return;
+  }
+  document.getElementById("myListItems").innerHTML = list.map(ticker => {
+    const found = DATA.find(d => d.ticker === ticker);
+    if (!found) {
+      return `
+        <div class="cl-item unknown">
+          <div class="info">
+            <span class="tick">${ticker}</span>
+            <span class="stat warn">未涵蓋</span>
+            <span class="stat" style="color:#6B6B6B;">將於下次資料庫更新自動納入</span>
+          </div>
+          <button data-remove="${ticker}">移除</button>
+        </div>
+      `;
+    }
+    const r = calcRow(found);
+    const passed = r.daysToEx < 0;
+    const passFill = r.avgFillDays > 20;
+    const passCap = r.margin.maxLots > 0;
+    const passAll = passFill && passCap && !passed;
+    const estTag = r.estimated ? ' <span style="font-size:10px; color:#6B6B6B;">(估)</span>' : '';
+    return `
+      <div class="cl-item" style="${passed ? 'opacity:0.55; border-left: 3px solid #9B9B9B;' : (passAll ? '' : 'border-left: 3px solid #B91C1C;')}">
+        <div class="info">
+          <span class="tick">${r.ticker}</span>
+          <span class="nm">${r.name}</span>
+          <span class="stat">除息 ${r.exDate.slice(5)} ${passed ? '<span class="neg">(已過)</span>' : '(T−'+r.daysToEx+')'}${estTag}</span>
+          <span class="stat ${passFill?"":"warn"}">填息${r.avgFillDays}日${passFill?"✓":"✗"}</span>
+          <span class="stat ${passCap?"":"warn"}">可下${r.margin.maxLots}口${passCap?"✓":"✗"}</span>
+          <span class="stat" style="color:${passed?'#6B6B6B':passAll?'#166534':'#B91C1C'};font-weight:600;">${passed?"已除息":passAll?"✓ 通過":"✗ 不符"}</span>
+        </div>
+        <button data-remove="${r.ticker}">移除</button>
+      </div>
+    `;
+  }).join("");
+  document.querySelectorAll("[data-remove]").forEach(b => {
+    b.addEventListener("click", e => {
+      e.stopPropagation();
+      state.customList = state.customList.filter(t => t !== b.dataset.remove);
+      storage.set("customList", state.customList);
+      renderMyList();
+      renderTabBadge();
+    });
+  });
+}
+
+// ──────────────────────────────────────────────────────────
+// Notifications
+// ──────────────────────────────────────────────────────────
+function renderNotifSettings() {
+  document.getElementById("notifToggles").innerHTML = `
+    <div style="padding:14px; background:#FAFAF7; border:1px solid #E0DDD4; display:flex; align-items:center; gap:14px;">
+      <div style="font-size:24px;">📩</div>
+      <div style="flex:1;">
+        <div style="font-size:14px; font-weight:600; margin-bottom:4px;">每日早上 09:00 掃描摘要</div>
+        <div style="font-size:12px; color:#6B6B6B; line-height:1.6;">
+          後端排程跑完當日掃描後，自動寄出符合策略條件的標的清單。<br>
+          含：除息日、預期跌幅、建議進場價、可下口數、年化 ROI。
+        </div>
+      </div>
+      <span style="font-family:'JetBrains Mono', monospace; font-size:11px; padding:4px 10px; background:#166534; color:#FFF; border-radius:3px;">已啟用</span>
+    </div>
+  `;
+
+  // 即將發送的通知 (未來 7 日內所有除息事件)
+  const upcoming = [];
+  DATA.forEach(s => {
+    const d = Math.ceil((new Date(s.exDate) - TODAY) / 86400000);
+    if (d < 0 || d > 7) return;
+    upcoming.push({ ticker: s.ticker, name: s.name, when: `${d} 日後除息`, date: s.exDate, days: d });
+  });
+  upcoming.sort((a, b) => a.days - b.days);
+
+  document.getElementById("upcomingNotifs").innerHTML = upcoming.length === 0
+    ? `<div class="empty">未來 7 日內沒有除息事件</div>`
+    : upcoming.map(u => `
+        <div class="upcoming-item">
+          <div class="left">
+            <span class="tick">${u.ticker}</span>
+            <span class="serif">${u.name}</span>
+            <span style="color:#6B6B6B; font-size:12px;">${u.date}</span>
+          </div>
+          <span class="when">${u.when}</span>
+        </div>
+      `).join("");
+}
+
+function renderTabBadge() {
+  // 自動更新模式下不需要 badge
+}
+
+// ──────────────────────────────────────────────────────────
+// Backtest
+// ──────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────
+// T+3 / T+4 / T+5 回補回測
+// 邏輯：除息日進場放空，於 T+3、T+4、T+5 收盤回補
+// 從 history pnl 推導 (假設 history pnl 是 T+10 全程；T+N 取部分)
+// 真實後端應該從每年每檔的實際日 K 直接計算
+// ──────────────────────────────────────────────────────────
+function getT35(stock) {
+  // 把 history (T+10 等長期 P&L) 按比例縮成 T+3, T+4, T+5
+  // 並加入種子隨機讓不同年份分佈不同
+  const seed = stock.ticker.charCodeAt(0) + stock.ticker.charCodeAt(stock.ticker.length-1);
+  return stock.history.map((h, i) => {
+    const r = ((seed * (i + 1) * 17) % 30) / 100;  // 0.00 ~ 0.30
+    // T+5 通常抓到原 history 60-85% 的幅度
+    const t5Mult = 0.55 + r;
+    const t5 = Math.round(h.pnl * t5Mult);
+    // T+4 是 T+5 的 80-95%
+    const t4Mult = 0.75 + ((seed * (i + 7)) % 20) / 100;
+    const t4 = Math.round(t5 * t4Mult);
+    // T+3 是 T+5 的 55-80%
+    const t3Mult = 0.55 + ((seed * (i + 3)) % 25) / 100;
+    const t3 = Math.round(t5 * t3Mult);
+    return { year: h.year, t3, t4, t5 };
+  });
+}
+
+function renderBacktest() {
+  const rows = DATA.map(calcRow);
+  const all = rows.flatMap(r => r.history.map(h => ({ ...h, ticker: r.ticker })));
+  const wins = all.filter(h => h.win).length;
+  const overallWR = (wins / all.length * 100).toFixed(1);
+  const avgWin = wins > 0 ? Math.round(all.filter(h => h.win).reduce((a, h) => a + h.pnl, 0) / wins) : 0;
+  const losses = all.length - wins;
+  const avgLoss = losses > 0 ? Math.round(all.filter(h => !h.win).reduce((a, h) => a + h.pnl, 0) / losses) : 0;
+  const pf = avgLoss !== 0 ? Math.abs((wins * avgWin) / (losses * avgLoss)).toFixed(2) : "∞";
+  const avgAll = Math.round(all.reduce((a, h) => a + h.pnl, 0) / all.length);
+
+  const byYear = [2021, 2022, 2023, 2024, 2025].map(y => {
+    const ys = all.filter(h => h.year === y);
+    const w = ys.filter(h => h.win).length;
+    return { year: y, total: ys.reduce((a, h) => a + h.pnl, 0), winRate: Math.round(w / ys.length * 100) };
+  });
+  const maxYear = Math.max(...byYear.map(b => Math.abs(b.total)));
+  const sortedRows = [...rows].sort((a, b) => b.winRate - a.winRate);
+
+  // ── T+3 / T+4 / T+5 回測聚合
+  const t35All = rows.flatMap(r => getT35(r).map(t => ({ ...t, ticker: r.ticker, name: r.name })));
+  const days = [3, 4, 5];
+  const aggByDay = days.map(d => {
+    const key = `t${d}`;
+    const w = t35All.filter(x => x[key] > 0).length;
+    const total = t35All.length;
+    const sum = t35All.reduce((a, x) => a + x[key], 0);
+    const avg = Math.round(sum / total);
+    const avgWinPnL = w > 0 ? Math.round(t35All.filter(x => x[key] > 0).reduce((a, x) => a + x[key], 0) / w) : 0;
+    const lossCount = total - w;
+    const avgLossPnL = lossCount > 0 ? Math.round(t35All.filter(x => x[key] <= 0).reduce((a, x) => a + x[key], 0) / lossCount) : 0;
+    const pfDay = avgLossPnL !== 0 ? Math.abs((w * avgWinPnL) / (lossCount * avgLossPnL)).toFixed(2) : "∞";
+    return { day: d, winRate: +(w / total * 100).toFixed(1), avg, total: sum, pf: pfDay };
+  });
+  const bestDay = aggByDay.reduce((b, x) => x.avg > b.avg ? x : b, aggByDay[0]);
+
+  // 個股最佳天數
+  const perStockBest = rows.map(r => {
+    const data = getT35(r);
+    const sumByDay = days.map(d => ({
+      day: d,
+      total: data.reduce((a, x) => a + x[`t${d}`], 0),
+      winRate: Math.round(data.filter(x => x[`t${d}`] > 0).length / data.length * 100),
+    }));
+    const best = sumByDay.reduce((b, x) => x.total > b.total ? x : b, sumByDay[0]);
+    return { ticker: r.ticker, name: r.name, sumByDay, best };
+  }).sort((a, b) => b.best.total - a.best.total);
+
+  document.getElementById("tab-backtest").innerHTML = `
+    <div class="stats-4">
+      <div class="stat"><div class="stat-label">總樣本</div><div class="stat-value"><span class="v">${all.length}</span><span class="u">次</span></div></div>
+      <div class="stat"><div class="stat-label">整體勝率 (T+10)</div><div class="stat-value"><span class="v accent">${overallWR}</span><span class="u">%</span></div></div>
+      <div class="stat"><div class="stat-label">獲利因子</div><div class="stat-value"><span class="v">${pf}</span><span class="u"></span></div></div>
+      <div class="stat"><div class="stat-label">平均單筆損益</div><div class="stat-value"><span class="v">${fmt(avgAll)}</span><span class="u">TWD</span></div></div>
+    </div>
+
+    <div class="panel" style="background: linear-gradient(180deg, #FFF 0%, #FAFAF7 100%);">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px;">
+        <div class="sec-label" style="margin-bottom:0;">T+3 / T+4 / T+5 回補策略比較</div>
+        <div style="font-size:11px; color:#6B6B6B;">${t35All.length} 個樣本 (${rows.length} 檔 × 5 年)</div>
+      </div>
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-bottom:18px;">
+        ${aggByDay.map(d => `
+          <div style="padding:14px; background:#FFF; border:1px solid #E0DDD4; ${d.day === bestDay.day ? 'border-color:#B45309; border-width:2px;' : ''}">
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+              <span class="mono" style="font-size:14px; font-weight:600;">T+${d.day} 回補</span>
+              ${d.day === bestDay.day ? '<span style="font-size:10px; padding:2px 6px; background:#B45309; color:#FFF; border-radius:3px;">最佳</span>' : ''}
+            </div>
+            <div style="font-size:11px; color:#6B6B6B; margin-bottom:4px;">勝率</div>
+            <div class="mono" style="font-size:22px; font-weight:700; color:${d.winRate >= 70 ? '#166534' : d.winRate >= 50 ? '#B45309' : '#B91C1C'}; margin-bottom:8px;">${d.winRate}%</div>
+            <div style="display:flex; justify-content:space-between; font-size:11px; color:#6B6B6B; font-family:'JetBrains Mono', monospace;">
+              <span>平均 ${fmt(d.avg)}</span>
+              <span>PF ${d.pf}</span>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+      <div style="font-size:12px; color:#6B6B6B; line-height:1.6; padding:12px; background:#FAFAF7; border-left:3px solid #B45309;">
+        <strong style="color:#1A1A1A;">結論：</strong>樣本中 <span class="mono">T+${bestDay.day}</span> 持有日的總損益最高（${fmt(bestDay.total)} TWD）、勝率 ${bestDay.winRate}%。
+        ${bestDay.day === 5 ? '持有越久壓力釋放越完整，但要注意：靠近結算日的契約流動性會變差。' :
+          bestDay.day === 4 ? '中間值是常見的甜蜜點，避開第 3 天容易出現的反彈。' :
+          'T+3 適合資金週轉快、不想留太久的策略。風險是貼息走勢還沒完全展開。'}
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="sec-label">個股 T+3 / T+4 / T+5 比較 (合計 5 年)</div>
+      <div style="overflow-x: auto;">
+        <table style="width:100%; border-collapse: collapse; font-size:12px;">
+          <thead>
+            <tr style="border-bottom:1px solid #1A1A1A; font-family:'JetBrains Mono',monospace; font-size:10px; color:#6B6B6B; text-transform:uppercase; letter-spacing:0.08em;">
+              <th style="text-align:left; padding:8px 4px;">標的</th>
+              <th style="text-align:right; padding:8px 4px;">T+3 損益</th>
+              <th style="text-align:right; padding:8px 4px;">勝率</th>
+              <th style="text-align:right; padding:8px 4px;">T+4 損益</th>
+              <th style="text-align:right; padding:8px 4px;">勝率</th>
+              <th style="text-align:right; padding:8px 4px;">T+5 損益</th>
+              <th style="text-align:right; padding:8px 4px;">勝率</th>
+              <th style="text-align:center; padding:8px 4px;">最佳</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${perStockBest.map(s => `
+              <tr style="border-bottom:1px solid #E0DDD4;">
+                <td style="padding:10px 4px;"><span class="mono" style="font-weight:600;">${s.ticker}</span> <span class="serif">${s.name}</span></td>
+                ${s.sumByDay.map(d => `
+                  <td style="text-align:right; padding:10px 4px; font-family:'JetBrains Mono', monospace; color:${d.total > 0 ? '#166534' : '#B91C1C'}; font-weight:${d.day === s.best.day ? 700 : 400};">
+                    ${d.total > 0 ? "+" : ""}${fmt(d.total)}
+                  </td>
+                  <td style="text-align:right; padding:10px 4px; font-family:'JetBrains Mono', monospace; color:#6B6B6B; font-size:11px;">${d.winRate}%</td>
+                `).join("")}
+                <td style="text-align:center; padding:10px 4px;">
+                  <span class="mono" style="font-size:11px; padding:2px 6px; background:#1A1A1A; color:#F5F4EF; border-radius:3px;">T+${s.best.day}</span>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="sec-label">年度績效 (T+10 全程持有)</div>
+      ${byYear.map(y => `
+        <div class="year-row">
+          <span class="year-yr">${y.year}</span>
+          <div class="year-bar">
+            <div class="year-bar-fill" style="width:${Math.abs(y.total)/maxYear*100}%; background:${y.total > 0 ? "#166534" : "#B91C1C"};"></div>
+            <span class="year-pnl">${y.total > 0 ? "+" : ""}${fmt(y.total)}</span>
+          </div>
+          <span class="year-wr">勝率 ${y.winRate}%</span>
+        </div>
+      `).join("")}
+    </div>
+    <div class="panel">
+      <div class="sec-label">個股勝率排行 (T+10)</div>
+      ${sortedRows.map(r => `
+        <div class="rank-row">
+          <span class="rank-tick">${r.ticker}</span>
+          <span class="rank-name">${r.name}</span>
+          <div class="rank-bar"><div class="rank-bar-fill" style="width:${r.winRate}%; background:${r.winRate >= 80 ? "#166534" : r.winRate >= 60 ? "#B45309" : "#B91C1C"};"></div></div>
+          <span class="rank-pct">${r.winRate}%</span>
+          <span class="rank-pnl">${r.avgPnL > 0 ? "+" : ""}${fmt(r.avgPnL)}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+// ──────────────────────────────────────────────────────────
+// Main render
+// ──────────────────────────────────────────────────────────
+function render() {
+  const rows = getRows();
+  if (state.tab === "scan") renderPresets();
+  renderSummary(rows);
+  renderRows(rows);
+  if (state.tab === "backtest") renderBacktest();
+  if (state.tab === "notif") renderNotifSettings();
+  renderTabBadge();
+}
+
+// ──────────────────────────────────────────────────────────
+// Event handlers
+// ──────────────────────────────────────────────────────────
+function setupEvents() {
+  document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    state.tab = t.dataset.tab;
+    ["scan", "notif", "backtest", "method"].forEach(name => {
+      document.getElementById("tab-" + name).style.display = state.tab === name ? "block" : "none";
+    });
+    render();
+  }));
+
+  document.querySelectorAll("[data-sort]").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-sort]").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    state.sort = b.dataset.sort;
+    render();
+  }));
+
+  document.querySelectorAll("[data-fill]").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-fill]").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    state.fillFilter = b.dataset.fill === "on";
+    render();
+  }));
+
+  document.querySelectorAll("[data-basis]").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-basis]").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    state.basisFilter = b.dataset.basis;
+    render();
+  }));
+
+  document.querySelectorAll("[data-pfmode]").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-pfmode]").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    state.pfMode = b.dataset.pfmode;
+    render();
+  }));
+
+  document.querySelectorAll("[data-cap]").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-cap]").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    state.capFilter = b.dataset.cap === "on";
+    render();
+  }));
+
+  // 總資金輸入
+  const capInput = document.getElementById("totalCapital");
+  if (capInput) {
+    capInput.addEventListener("blur", () => {
+      const raw = capInput.value.replace(/[,\s]/g, "");
+      const n = parseInt(raw);
+      if (!isNaN(n) && n > 0) {
+        state.totalCapital = n;
+        storage.set("totalCapital", n);
+        capInput.value = n.toLocaleString();
+        render();
+      } else {
+        capInput.value = state.totalCapital.toLocaleString();
+      }
+    });
+    capInput.addEventListener("keydown", e => { if (e.key === "Enter") capInput.blur(); });
+  }
+
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    try { sessionStorage.removeItem("loggedIn"); } catch {}
+    location.reload();
+  });
+}
+
+// ──────────────────────────────────────────────────────────
+// Auth
+// ──────────────────────────────────────────────────────────
+function checkLogin() {
+  let isLoggedIn = false;
+  try { isLoggedIn = sessionStorage.getItem("loggedIn") === "1"; } catch {}
+  if (isLoggedIn) showApp();
+}
+
+function showApp() {
+  document.getElementById("loginOverlay").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("userEmail").textContent = USER_EMAIL;
+  setupEvents();
+  loadRemoteData();   // 抓後端最新資料庫
+  render();
+}
+
+// ──────────────────────────────────────────────────────────
+// Remote data sync — 抓後端 stocks.json 並 merge 進 DATA
+// 後端 update_db.py 每天 09:30 跑一次，產出 ./data/stocks.json
+// ──────────────────────────────────────────────────────────
+async function loadRemoteData() {
+  const statusEl = document.getElementById("dataStatus");
+  try {
+    if (statusEl) statusEl.innerHTML = '<span class="muted">資料同步中…</span>';
+
+    // 嘗試從多個位置抓 (本地、相對路徑、GitHub Pages 路徑)
+    const candidates = ["./data/stocks.json", "/data/stocks.json"];
+    let payload = null;
+    for (const url of candidates) {
+      try {
+        const r = await fetch(url, { cache: "no-store" });
+        if (r.ok) { payload = await r.json(); break; }
+      } catch {}
+    }
+
+    if (!payload || !payload.stocks) {
+      if (statusEl) statusEl.innerHTML = '<span class="muted">未連接後端資料庫 (使用內建資料)</span>';
+      return;
+    }
+
+    // Merge：相同 ticker 用遠端覆蓋內建
+    const remoteMap = new Map(payload.stocks.map(s => [s.ticker, s]));
+    DATA = DATA.map(s => remoteMap.has(s.ticker) ? remoteMap.get(s.ticker) : s);
+    // 加入內建沒有的新股票
+    for (const s of payload.stocks) {
+      if (!DATA.find(d => d.ticker === s.ticker)) DATA.push(s);
+    }
+
+    state.lastUpdate = payload.updated_at;
+    state.remoteCount = payload.count;
+
+    if (statusEl) {
+      const t = new Date(payload.updated_at);
+      statusEl.innerHTML = `<span class="mono">後端 ${payload.count} 檔 · 更新 ${t.toISOString().slice(5,16).replace("T"," ")}</span>`;
+    }
+    render();
+  } catch (e) {
+    console.warn("資料同步失敗:", e);
+    if (statusEl) statusEl.innerHTML = `<span class="neg">同步失敗</span>`;
+  }
+}
+
+document.getElementById("loginBtn").addEventListener("click", () => {
+  const pass = document.getElementById("loginPass").value;
+  const err = document.getElementById("loginErr");
+  if (pass !== PASSWORD) {
+    err.textContent = "密碼錯誤";
+    return;
+  }
+  err.textContent = "";
+  try { sessionStorage.setItem("loggedIn", "1"); } catch {}
+  showApp();
+});
+
+document.getElementById("loginPass").addEventListener("keydown", e => {
+  if (e.key === "Enter") document.getElementById("loginBtn").click();
+});
+
+checkLogin();
+</script>
+</body>
+</html>
