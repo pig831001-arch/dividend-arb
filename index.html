@@ -76,12 +76,12 @@
   .pill.active { background: #1A1A1A; color: #F5F4EF; border-color: #1A1A1A; }
 
   /* Table header */
-  .thead { display: grid; grid-template-columns: 2.4fr 1.4fr 1.4fr 1.4fr 0.9fr 0.9fr 1.5fr 1fr 0.5fr; gap: 8px; padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #6B6B6B; text-transform: uppercase; letter-spacing: 0.08em; }
+  .thead { display: grid; grid-template-columns: 3fr 1.1fr 1.1fr 1.4fr 0.8fr 1fr; gap: 8px; padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #6B6B6B; text-transform: uppercase; letter-spacing: 0.08em; }
   .thead .r { text-align: right; }
 
   /* Row */
   .row { background: #FFF; border: 1px solid #E0DDD4; margin-bottom: 8px; overflow: hidden; transition: all 0.15s; }
-  .row-head { display: grid; grid-template-columns: 2.4fr 1.4fr 1.4fr 1.4fr 0.9fr 0.9fr 1.5fr 1fr 0.5fr; gap: 8px; padding: 14px 12px; align-items: center; text-align: left; width: 100%; }
+  .row-head { display: grid; grid-template-columns: 3fr 1.1fr 1.1fr 1.4fr 0.8fr 1fr; gap: 8px; padding: 14px 12px; align-items: center; text-align: left; width: 100%; cursor: default; }
   .row-head:hover { background: #FAFAF7; }
   .row-name { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
   .row-name .tick { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; }
@@ -213,8 +213,8 @@
     h1 { font-size: 22px; }
     .stats, .stats-4 { grid-template-columns: 1fr 1fr; }
     .thead { display: none; }
-    .row-head { grid-template-columns: 1fr auto; gap: 8px; padding: 12px; }
-    .row-head .col-spot, .row-head .col-div, .row-head .col-margin, .row-head .col-lots, .row-head .col-ex, .row-head .col-wr, .row-head .col-roi, .row-head .row-net { display: none; }
+    .row-head { grid-template-columns: 1fr; gap: 8px; padding: 12px; }
+    .row-head .col-spot, .row-head .col-div, .row-head .col-margin, .row-head .col-lots, .row-head .col-roi { display: none; }
     .row-mobile { display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px; gap: 10px; flex-wrap: wrap; }
     .row-mobile .item { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #6B6B6B; }
     .row-mobile .item .v { color: #1A1A1A; font-weight: 500; }
@@ -255,9 +255,6 @@
 
   <div class="tabs" id="tabs">
     <button class="tab active" data-tab="scan">掃描</button>
-    <button class="tab" data-tab="notif">通知</button>
-    <button class="tab" data-tab="backtest">回測</button>
-    <button class="tab" data-tab="method">方法論</button>
     <button class="tab" data-tab="calendar">除息日程</button>
   </div>
 
@@ -300,14 +297,11 @@
 
     <div class="thead">
       <div>標的</div>
-      <div class="r">現股 / F</div>
+      <div class="r">現股</div>
       <div class="r">股利 / 殖利</div>
       <div class="r">保證金 / 口</div>
-      <div class="r">可下口數</div>
-      <div class="r">勝率</div>
-      <div class="r">淨利 / 口</div>
+      <div class="r">口數</div>
       <div class="r">年化 ROI</div>
-      <div></div>
     </div>
 
     <div id="rows"></div>
@@ -494,7 +488,7 @@
 // ──────────────────────────────────────────────────────────
 // Constants
 // ──────────────────────────────────────────────────────────
-const TODAY = new Date("2026-06-19");
+const TODAY = (() => { const d = new Date(); d.setHours(0,0,0,0); return d; })();
 const CONTRACT_SIZE = 2000;
 const DIV_TAX_RATE = 0.28;
 const NHI_THRESHOLD = 20000;
@@ -802,9 +796,10 @@ function calcRow(s) {
   const entry = calcEntry(s, preset);
   const basis = calcBasis(s);
   const spread = calcSpread(s, daysToEx);
-  const wins = s.history.filter(h => h.win).length;
-  const winRate = Math.round(wins / s.history.length * 100);
-  const avgPnL = Math.round(s.history.reduce((a,h)=>a+h.pnl,0) / s.history.length);
+  const hist = (s.history && s.history.length > 0) ? s.history : null;
+  const wins = hist ? hist.filter(h => h.win).length : null;
+  const winRate = hist ? Math.round(wins / hist.length * 100) : null;
+  const avgPnL = hist ? Math.round(hist.reduce((a,h)=>a+h.pnl,0) / hist.length) : 0;
   const avgFillDays = avgFill(s.fillDays);
   const unfilled = unfilledCount(s.fillDays);
 
@@ -839,7 +834,7 @@ function getRows() {
     .filter(r => r.daysToEx <= 35 && r.daysToEx >= 0)
     .filter(r => !state.fillFilter || r.avgFillDays > preset.minFillDays)
     .filter(r => r.unfilled >= preset.minUnfilled)
-    .filter(r => r.winRate >= preset.minWinRate)
+    .filter(r => r.winRate === null || r.winRate >= preset.minWinRate)
     .filter(r => !state.capFilter || r.margin.maxLots > 0)
     .filter(r => state.basisFilter === "all" || (state.basisFilter === "strong" && (r.basis.level === "strong" || r.basis.level === "good")))
     .sort((a, b) => {
@@ -901,7 +896,8 @@ function renderSummary(rows) {
   const totalNet = selected.reduce((a, r) => a + r.short.net * r.margin.maxLots, 0);
   const totalUsed = selected.reduce((a, r) => a + r.margin.usedCapital, 0);
   const portfolioRoi = totalUsed > 0 ? +(totalNet / totalUsed * 100).toFixed(2) : 0;
-  const avgWR = selected.length ? Math.round(selected.reduce((a, r) => a + r.winRate, 0) / selected.length) : 0;
+  const wrData = selected.filter(r => r.winRate !== null);
+  const avgWR = wrData.length ? Math.round(wrData.reduce((a, r) => a + r.winRate, 0) / wrData.length) : 0;
   const totalCapUsedPct = state.totalCapital > 0 ? +(totalUsed / state.totalCapital * 100).toFixed(1) : 0;
 
   document.getElementById("summary").innerHTML = `
@@ -927,52 +923,38 @@ function renderRows(rows) {
     return;
   }
   document.getElementById("rows").innerHTML = rows.map(r => {
-    const net = r.short.net;
-    const expanded = state.expanded === r.ticker;
-    const fillTag = r.unfilled > 0 ? `<span class="neg">${r.avgFillDays}日(${r.unfilled}次未填)</span>` : `${r.avgFillDays}日`;
     const overCap = r.margin.maxLots === 0;
+    const roiColor = r.annRoiPct > 50 ? '#166534' : r.annRoiPct > 0 ? '#B45309' : '#B91C1C';
     return `
       <div class="row ${overCap ? "over-cap" : ""}">
-        <button class="row-head" data-toggle="${r.ticker}">
+        <div class="row-head">
           <div>
             <div class="row-name">
               <span class="tick">${r.ticker}</span>
               <span class="nm">${r.name}</span>
-              <span class="tier">${r.marginTier}級 ${(r.margin.rate*100).toFixed(2)}%</span>
-              <span style="font-family:'JetBrains Mono', monospace; font-size:10px; padding:1px 6px; background:${r.basis.color}; color:#FFF; border-radius:3px; font-weight:600;">
+              <span class="tier">${r.marginTier}級</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;padding:1px 6px;background:${r.basis.color};color:#FFF;border-radius:3px;font-weight:600;">
                 基差 ${r.basis.basisPct > 0 ? '+' : ''}${r.basis.basisPct}%
               </span>
               ${exBadge(r.daysToEx, r.exDate, r.estimated)}
             </div>
-            <div class="row-sub">${r.sector} · ${r.etfs.length} 檔 ETF · 填息 ${fillTag} · 量${r.futuresVolume}口 · 預期跌幅 ${r.expectedDeclinePct}% / ${r.targetHoldDays}日</div>
-            <div class="row-mobile">
-              <span class="item">現/F <span class="v">${r.spotPrice.toFixed(2)}/${r.futuresPrice.toFixed(2)}</span></span>
-              <span class="item">保證金/口 <span class="v">${fmt(r.margin.initial)}</span></span>
-              <span class="item">可下 <span class="v ${overCap?"neg":""}">${r.margin.maxLots}口</span></span>
-              <span class="item">勝率 <span class="v">${r.winRate}%</span></span>
-              <span class="item">淨利/口 <span class="v" style="color:${net>0?'#B45309':'#B91C1C'};">${net>0?'+':''}${fmt(net)}</span></span>
-              <span class="item">年化 <span class="v" style="color:${r.annRoiPct>50?'#166534':r.annRoiPct>0?'#B45309':'#B91C1C'}; font-weight:700;">${r.annRoiPct>0?'+':''}${r.annRoiPct}%</span></span>
+            <div class="row-mobile" style="margin-top:6px;">
+              <span class="item">現股 <span class="v">${r.spotPrice.toFixed(2)}</span></span>
+              <span class="item">股利 <span class="v">${r.cashDividend.toFixed(2)} (${r.yieldPct}%)</span></span>
+              <span class="item">保 <span class="v">${fmt(r.margin.initial)}</span></span>
+              <span class="item">口數 <span class="v ${overCap?"neg":""}">${r.margin.maxLots}</span></span>
+              <span class="item">年化 <span class="v" style="color:${roiColor};font-weight:700;">${r.annRoiPct>0?'+':''}${r.annRoiPct}%</span></span>
             </div>
           </div>
-          <div class="row-num col-spot">${r.spotPrice.toFixed(2)}<div class="sub">${r.futuresPrice.toFixed(2)}</div></div>
+          <div class="row-num col-spot">${r.spotPrice.toFixed(2)}</div>
           <div class="row-num col-div">${r.cashDividend.toFixed(2)}<div class="sub">${r.yieldPct}%</div></div>
           <div class="row-num col-margin">${fmt(r.margin.initial)}<div class="sub">維 ${fmt(r.margin.maint)}</div></div>
           <div class="row-num col-lots" style="font-weight:600;">${r.margin.maxLots}<div class="sub">${fmt(r.margin.usedCapital)}</div></div>
-          <div class="row-num col-wr" style="font-weight:600;">${r.winRate}%</div>
-          <div class="row-net ${net > 0 ? "accent" : "neg"}">${net > 0 ? "+" : ""}${fmt(net)}</div>
-          <div class="row-num col-roi" style="font-weight:600; color:${r.annRoiPct > 50 ? '#166534' : r.annRoiPct > 0 ? '#B45309' : '#B91C1C'};">${r.annRoiPct > 0 ? '+' : ''}${r.annRoiPct}%<div class="sub">單筆 ${r.roiPct > 0 ? '+' : ''}${r.roiPct}%</div></div>
-          <div class="chev">${expanded ? "▲" : "▼"}</div>
-        </button>
-        ${expanded ? renderDetail(r) : ""}
+          <div class="row-num col-roi" style="font-weight:700;color:${roiColor};">${r.annRoiPct>0?'+':''}${r.annRoiPct}%<div class="sub" style="color:#6B6B6B;font-weight:400;">勝率 ${r.winRate != null ? r.winRate+'%' : '—'}</div></div>
+        </div>
       </div>
     `;
   }).join("");
-  document.querySelectorAll("[data-toggle]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      state.expanded = state.expanded === btn.dataset.toggle ? null : btn.dataset.toggle;
-      render();
-    });
-  });
 }
 
 function renderMargin(r) {
