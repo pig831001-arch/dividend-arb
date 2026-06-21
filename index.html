@@ -372,44 +372,28 @@
     </div>
 
     <div class="panel">
-      <h3 style="font-size: 16px;">三種策略風格</h3>
-      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:10px;">
-        <div style="padding:12px; background:#FAFAF7; border:1px solid #E0DDD4;">
-          <div style="font-weight:700; margin-bottom:4px;">高勝率型</div>
-          <div style="font-size:11px; color:#6B6B6B; line-height:1.7;">
-            進場 T−2~T−1<br>
-            出場 T+5<br>
-            停利 70% / 停損 0.5%<br>
-            單檔 20% × 5 檔<br>
-            篩選嚴 (填息 &gt;30 + 1次未填)
-          </div>
+      <h3 style="font-size: 16px;">策略參數：高息股期除息空</h3>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px; font-size:12px;">
+        <div style="padding:12px; background:#FAFAF7; border:1px solid #E0DDD4; line-height:1.8;">
+          <div style="font-weight:700; margin-bottom:6px;">進出場</div>
+          進場：T−3（除息前 3 個交易日）<br>
+          出場：T+10（除息後第 10 個交易日）<br>
+          停損：反漲 1% 砍倉<br>
+          停利：持有到底（不設）
         </div>
-        <div style="padding:12px; background:#FAFAF7; border:1px solid #E0DDD4;">
-          <div style="font-weight:700; margin-bottom:4px;">進取</div>
-          <div style="font-size:11px; color:#6B6B6B; line-height:1.7;">
-            進場 T−3<br>
-            出場 T+10<br>
-            不停利 / 停損 1%<br>
-            單檔 30% × 8 檔<br>
-            篩選寬 (填息 &gt;20)
-          </div>
-        </div>
-        <div style="padding:12px; background:#FAFAF7; border:1px solid #E0DDD4;">
-          <div style="font-weight:700; margin-bottom:4px;">客製</div>
-          <div style="font-size:11px; color:#6B6B6B; line-height:1.7;">
-            進場 T−1<br>
-            出場 T+5<br>
-            停利 60% / 停損 0.5%<br>
-            單檔 20% × 5 檔<br>
-            篩選預設寬鬆
-          </div>
+        <div style="padding:12px; background:#FAFAF7; border:1px solid #E0DDD4; line-height:1.8;">
+          <div style="font-weight:700; margin-bottom:6px;">資金配置</div>
+          單檔上限：總資金 30%<br>
+          同時最多：8 檔<br>
+          篩選門檻：填息 &gt; 20 日<br>
+          最低勝率：50%（近 5 年回測）
         </div>
       </div>
     </div>
 
     <div class="panel">
       <h3 style="font-size: 16px;">期現基差訊號 (自營部視角)</h3>
-      <p>基差 = 期貨價 − 現股價。除息前的基差水位反映市場預期：</p>
+      <p>基差 = 期貨價 − 現股價（正常值約 −0.3% ~ −1%）。除息前基差水位反映市場預期；通常個股期期貨略貼水於現股，除息日前後基差變化是進出場的重要訊號：</p>
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px; font-size:12px;">
         <div style="padding:10px; background:#F0FDF4; border-left:3px solid #166534;">
           <strong>深度逆價差 (&lt;−2%)</strong><br>
@@ -1950,7 +1934,14 @@ async function fetchLivePrices() {
     });
 
     if (Object.keys(priceMap).length > 0) {
-      DATA = DATA.map(s => priceMap[s.ticker] ? { ...s, spotPrice: priceMap[s.ticker] } : s);
+      DATA = DATA.map(s => {
+        if (!priceMap[s.ticker]) return s;
+        const newSpot = priceMap[s.ticker];
+        // 維持原本的基差比例（若有舊資料），避免只改現股造成假基差
+        const basisRatio = s.spotPrice > 0 ? s.futuresPrice / s.spotPrice : 0.995;
+        const newFutures = +(newSpot * basisRatio).toFixed(2);
+        return { ...s, spotPrice: newSpot, futuresPrice: newFutures };
+      });
       const now = new Date();
       const t = `${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")}`;
       const statusEl = document.getElementById("dataStatus");
