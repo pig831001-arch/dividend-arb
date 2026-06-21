@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-21T04:23:12.064Z",
+  "updated_at": "2026-06-21T22:43:23.430163+08:00",
   "today": "2026-06-21",
   "count": 12,
   "stocks": [
@@ -7,8 +7,8 @@
       "ticker": "2882",
       "name": "國泰金",
       "sector": "金融",
-      "spotPrice": 112.5,
-      "futuresPrice": 111.8,
+      "spotPrice": 115.5,
+      "futuresPrice": 114.92,
       "cashDividend": 3.5,
       "exDate": "2026-06-30",
       "futuresVolume": 2840,
@@ -68,14 +68,15 @@
         8,
         14,
         11
-      ]
+      ],
+      "estimated": true
     },
     {
       "ticker": "2317",
       "name": "鴻海",
       "sector": "電子代工",
-      "spotPrice": 270.5,
-      "futuresPrice": 268.8,
+      "spotPrice": 268.5,
+      "futuresPrice": 267.16,
       "cashDividend": 7.2,
       "exDate": "2026-07-02",
       "futuresVolume": 6240,
@@ -135,14 +136,15 @@
         18,
         24,
         22
-      ]
+      ],
+      "estimated": true
     },
     {
       "ticker": "2357",
       "name": "華碩",
       "sector": "電腦週邊",
-      "spotPrice": 580,
-      "futuresPrice": 574.5,
+      "spotPrice": 789.0,
+      "futuresPrice": 785.05,
       "cashDividend": 42,
       "exDate": "2026-07-01",
       "futuresVolume": 1820,
@@ -202,7 +204,8 @@
         14,
         6,
         57
-      ]
+      ],
+      "estimated": true
     },
     {
       "ticker": "3264",
@@ -254,14 +257,15 @@
         56,
         1,
         1
-      ]
+      ],
+      "estimated": true
     },
     {
       "ticker": "5347",
       "name": "世界",
       "sector": "半導體晶圓代工",
-      "spotPrice": 146,
-      "futuresPrice": 144.5,
+      "spotPrice": 174.5,
+      "futuresPrice": 173.63,
       "cashDividend": 4.5,
       "exDate": "2026-07-06",
       "futuresVolume": 1240,
@@ -311,14 +315,15 @@
         null,
         null,
         58
-      ]
+      ],
+      "estimated": true
     },
     {
       "ticker": "3231",
       "name": "緯創",
       "sector": "電子代工",
-      "spotPrice": 156,
-      "futuresPrice": 155,
+      "spotPrice": 161.5,
+      "futuresPrice": 160.69,
       "cashDividend": 5.5,
       "exDate": "2026-07-08",
       "futuresVolume": 5840,
@@ -378,14 +383,15 @@
         8,
         4,
         12
-      ]
+      ],
+      "estimated": true
     },
     {
       "ticker": "2603",
       "name": "長榮",
       "sector": "航運",
-      "spotPrice": 178,
-      "futuresPrice": 176.5,
+      "spotPrice": 193.0,
+      "futuresPrice": 192.03,
       "cashDividend": 16,
       "exDate": "2026-06-17",
       "futuresVolume": 3201,
@@ -440,14 +446,15 @@
         null,
         124,
         38
-      ]
+      ],
+      "estimated": true
     },
     {
       "ticker": "2308",
       "name": "台達電",
       "sector": "電子零組件",
-      "spotPrice": 2180,
-      "futuresPrice": 2170,
+      "spotPrice": 2150.0,
+      "futuresPrice": 2139.25,
       "cashDividend": 11.6,
       "exDate": "2026-06-17",
       "futuresVolume": 980,
@@ -497,14 +504,15 @@
         35,
         18,
         26
-      ]
+      ],
+      "estimated": true
     },
     {
       "ticker": "1319",
       "name": "東陽",
       "sector": "汽車零組件",
-      "spotPrice": 122,
-      "futuresPrice": 120.5,
+      "spotPrice": 99.2,
+      "futuresPrice": 98.7,
       "cashDividend": 5,
       "exDate": "2026-06-22",
       "futuresVolume": 280,
@@ -543,14 +551,15 @@
         24,
         null,
         null
-      ]
+      ],
+      "estimated": true
     },
     {
       "ticker": "2891",
       "name": "中信金",
       "sector": "金融",
-      "spotPrice": 58.2,
-      "futuresPrice": 58,
+      "spotPrice": 71.9,
+      "futuresPrice": 71.54,
       "cashDividend": 2.5,
       "exDate": "2026-07-14",
       "futuresVolume": 2103,
@@ -612,8 +621,8 @@
       "ticker": "2412",
       "name": "中華電",
       "sector": "電信",
-      "spotPrice": 130,
-      "futuresPrice": 129.5,
+      "spotPrice": 144.0,
+      "futuresPrice": 143.28,
       "cashDividend": 5,
       "exDate": "2026-07-03",
       "futuresVolume": 612,
@@ -675,8 +684,8 @@
       "ticker": "1101",
       "name": "台泥",
       "sector": "水泥",
-      "spotPrice": 32.1,
-      "futuresPrice": 31.95,
+      "spotPrice": 24.5,
+      "futuresPrice": 24.38,
       "cashDividend": 1.5,
       "exDate": "2026-07-10",
       "futuresVolume": 412,
