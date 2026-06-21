@@ -532,21 +532,8 @@ const USER_EMAIL = "850404gary@gmail.com";
 // 策略風格預設值
 // ──────────────────────────────────────────────────────────
 const PRESETS = {
-  xiaoge: {
-    name: "高勝率型",
-    desc: "嚴選填息差、有未填紀錄的標的",
-    minFillDays: 30,
-    minUnfilled: 1,
-    minWinRate: 60,
-    holdDays: 5,
-    entryTiming: "T−2 ~ T−1",
-    takeProfit: 70,
-    stopLoss: 0.5,
-    positionPct: 20,
-    maxStocks: 5,
-  },
   aggressive: {
-    name: "進取",
+    name: "高息股期除息空",
     desc: "放寬篩選、加大部位、長持有",
     minFillDays: 20,
     minUnfilled: 0,
@@ -557,19 +544,6 @@ const PRESETS = {
     stopLoss: 1.0,
     positionPct: 30,
     maxStocks: 8,
-  },
-  custom: {
-    name: "客製",
-    desc: "自由設定",
-    minFillDays: 20,
-    minUnfilled: 0,
-    minWinRate: 0,
-    holdDays: 5,
-    entryTiming: "T−1",
-    takeProfit: 60,
-    stopLoss: 0.5,
-    positionPct: 20,
-    maxStocks: 5,
   },
 };
 
@@ -868,7 +842,7 @@ let state = {
   capFilter: true,
   basisFilter: "all",
   expanded: null,
-  preset: "xiaoge",
+  preset: "aggressive",
   pfMode: "pure",
   totalCapital: storage.get("totalCapital", 1000000),  // 預設總資金 100 萬
   customList: storage.get("customList", []),
@@ -902,7 +876,7 @@ function fmt(n) { return n.toLocaleString(); }
 function renderPresets() {
   const grid = document.getElementById("presetGrid");
   if (!grid) return;
-  const keys = ["xiaoge", "aggressive", "custom"];
+  const keys = ["aggressive"];
   grid.innerHTML = keys.map(k => {
     const p = PRESETS[k];
     const active = state.preset === k;
