@@ -258,6 +258,7 @@
     <button class="tab" data-tab="notif">通知</button>
     <button class="tab" data-tab="backtest">回測</button>
     <button class="tab" data-tab="method">方法論</button>
+    <button class="tab" data-tab="calendar">除息日程</button>
   </div>
 
   <!-- SCAN -->
@@ -497,6 +498,9 @@
     </div>
   </div>
 
+  <!-- CALENDAR -->
+  <div id="tab-calendar" style="display:none;"></div>
+
   <div class="footer">
     <div class="alert">⚠ 研究輔助工具，非投資建議。資料截至 2026/06/19，實際使用需串接 TWSE / TAIFEX / SITCA 即時資料。</div>
   </div>
@@ -590,18 +594,19 @@ const storage = {
 // estimated: 除息日尚未公告，僅依歷史模式估計
 // 資料來源：TWSE / 公開資訊觀測站 (核對至 2026-06-19)
 let DATA = [
-  // ── 確認公告 ──────────────────────────────
-  { ticker:"2882", name:"國泰金", sector:"金融", spotPrice:112.5, futuresPrice:111.8, cashDividend:3.5, exDate:"2026-06-30", futuresVolume:2840, marginTier:"A",
+  // ── 已確認公告 ──────────────────────────────
+  // 3264欣銓/2603長榮/2308台達電/1319東陽 已確認；其餘依歷史模式估計(estimated:true)
+  { ticker:"2882", name:"國泰金", sector:"金融", spotPrice:112.5, futuresPrice:111.8, cashDividend:3.5, exDate:"2026-06-30", futuresVolume:2840, marginTier:"A", estimated:true,
     expectedDeclinePct:1.2, targetHoldDays:5,
     etfs:[{id:"0056",name:"元大高股息",weight:4.82},{id:"00878",name:"國泰永續高股息",weight:5.31},{id:"00919",name:"群益台灣精選高息",weight:4.95},{id:"00713",name:"元大台灣高息低波",weight:3.21}],
     history:[{year:2025,pnl:480,win:true},{year:2024,pnl:920,win:true},{year:2023,pnl:-280,win:false},{year:2022,pnl:-820,win:false},{year:2021,pnl:1240,win:true}],
     fillDays:[8, 14, 11] },
-  { ticker:"2317", name:"鴻海", sector:"電子代工", spotPrice:270.5, futuresPrice:268.8, cashDividend:7.2, exDate:"2026-07-02", futuresVolume:6240, marginTier:"A",
+  { ticker:"2317", name:"鴻海", sector:"電子代工", spotPrice:270.5, futuresPrice:268.8, cashDividend:7.2, exDate:"2026-07-02", futuresVolume:6240, marginTier:"A", estimated:true,
     expectedDeclinePct:2.5, targetHoldDays:8,
     etfs:[{id:"0056",name:"元大高股息",weight:6.92},{id:"00878",name:"國泰永續高股息",weight:5.45},{id:"00919",name:"群益台灣精選高息",weight:5.10},{id:"00929",name:"復華台灣科技優息",weight:7.30}],
     history:[{year:2025,pnl:9280,win:true},{year:2024,pnl:7520,win:true},{year:2023,pnl:8840,win:true},{year:2022,pnl:-2240,win:false},{year:2021,pnl:4920,win:true}],
     fillDays:[18, 24, 22] },
-  { ticker:"2357", name:"華碩", sector:"電腦週邊", spotPrice:580.0, futuresPrice:574.5, cashDividend:42.0, exDate:"2026-07-01", futuresVolume:1820, marginTier:"A",
+  { ticker:"2357", name:"華碩", sector:"電腦週邊", spotPrice:580.0, futuresPrice:574.5, cashDividend:42.0, exDate:"2026-07-01", futuresVolume:1820, marginTier:"A", estimated:true,
     expectedDeclinePct:3.2, targetHoldDays:10,
     etfs:[{id:"0056",name:"元大高股息",weight:5.42},{id:"00878",name:"國泰永續高股息",weight:4.18},{id:"00919",name:"群益台灣精選高息",weight:6.31},{id:"00929",name:"復華台灣科技優息",weight:4.85}],
     history:[{year:2025,pnl:18420,win:true},{year:2024,pnl:14280,win:true},{year:2023,pnl:-2820,win:false},{year:2022,pnl:22640,win:true},{year:2021,pnl:8240,win:true}],
@@ -611,12 +616,12 @@ let DATA = [
     etfs:[{id:"00936",name:"台新永續高息中小",weight:3.21}],
     history:[{year:2025,pnl:1280,win:true},{year:2024,pnl:9840,win:true},{year:2023,pnl:-3820,win:false},{year:2022,pnl:8240,win:true},{year:2021,pnl:2820,win:true}],
     fillDays:[56, 1, 1] },
-  { ticker:"5347", name:"世界", sector:"半導體晶圓代工", spotPrice:146.0, futuresPrice:144.5, cashDividend:4.5, exDate:"2026-07-06", futuresVolume:1240, marginTier:"A",
+  { ticker:"5347", name:"世界", sector:"半導體晶圓代工", spotPrice:146.0, futuresPrice:144.5, cashDividend:4.5, exDate:"2026-07-06", futuresVolume:1240, marginTier:"A", estimated:true,
     expectedDeclinePct:6.5, targetHoldDays:15,
     etfs:[{id:"00929",name:"復華台灣科技優息",weight:5.42},{id:"00919",name:"群益台灣精選高息",weight:3.18}],
     history:[{year:2025,pnl:14820,win:true},{year:2024,pnl:18320,win:true},{year:2023,pnl:22640,win:true},{year:2022,pnl:25240,win:true},{year:2021,pnl:-2280,win:false}],
     fillDays:[null, null, 58] },
-  { ticker:"3231", name:"緯創", sector:"電子代工", spotPrice:156.0, futuresPrice:155.0, cashDividend:5.5, exDate:"2026-07-08", futuresVolume:5840, marginTier:"A",
+  { ticker:"3231", name:"緯創", sector:"電子代工", spotPrice:156.0, futuresPrice:155.0, cashDividend:5.5, exDate:"2026-07-08", futuresVolume:5840, marginTier:"A", estimated:true,
     expectedDeclinePct:1.0, targetHoldDays:5,
     etfs:[{id:"0056",name:"元大高股息",weight:4.51},{id:"00878",name:"國泰永續高股息",weight:3.92},{id:"00929",name:"復華台灣科技優息",weight:5.18},{id:"00919",name:"群益台灣精選高息",weight:4.20}],
     history:[{year:2025,pnl:-2820,win:false},{year:2024,pnl:-1640,win:false},{year:2023,pnl:2240,win:true},{year:2022,pnl:-1980,win:false},{year:2021,pnl:1820,win:true}],
@@ -645,12 +650,12 @@ let DATA = [
     etfs:[{id:"0056",name:"元大高股息",weight:5.14},{id:"00878",name:"國泰永續高股息",weight:4.78},{id:"00919",name:"群益台灣精選高息",weight:5.62}],
     history:[{year:2025,pnl:1180,win:true},{year:2024,pnl:1820,win:true},{year:2023,pnl:640,win:true},{year:2022,pnl:-1240,win:false},{year:2021,pnl:980,win:true}],
     fillDays:[null, 92, 70] },
-  { ticker:"2412", name:"中華電", sector:"電信", spotPrice:130.0, futuresPrice:129.5, cashDividend:5.0, exDate:"2026-07-03", futuresVolume:612, marginTier:"A", estimated:true,
+  { ticker:"2412", name:"中華電", sector:"電信", spotPrice:130.0, futuresPrice:129.5, cashDividend:5.2, exDate:"2026-07-03", futuresVolume:612, marginTier:"A", estimated:true,
     expectedDeclinePct:3.5, targetHoldDays:10,
     etfs:[{id:"0056",name:"元大高股息",weight:3.45},{id:"00878",name:"國泰永續高股息",weight:4.12},{id:"00713",name:"元大台灣高息低波",weight:4.88}],
     history:[{year:2025,pnl:7240,win:true},{year:2024,pnl:8580,win:true},{year:2023,pnl:6820,win:true},{year:2022,pnl:5120,win:true},{year:2021,pnl:3640,win:true}],
     fillDays:[28, 42, 31] },
-  { ticker:"1101", name:"台泥", sector:"水泥", spotPrice:32.1, futuresPrice:31.95, cashDividend:1.5, exDate:"2026-07-10", futuresVolume:412, marginTier:"A", estimated:true,
+  { ticker:"1101", name:"台泥", sector:"水泥", spotPrice:32.1, futuresPrice:31.95, cashDividend:0.8, exDate:"2026-07-01", futuresVolume:412, marginTier:"A", estimated:true,
     expectedDeclinePct:5.5, targetHoldDays:12,
     etfs:[{id:"0056",name:"元大高股息",weight:2.18},{id:"00713",name:"元大台灣高息低波",weight:3.05}],
     history:[{year:2025,pnl:4880,win:true},{year:2024,pnl:-1340,win:false},{year:2023,pnl:3620,win:true},{year:2022,pnl:-980,win:false},{year:2021,pnl:2740,win:true}],
@@ -1696,6 +1701,104 @@ function renderBacktest() {
 }
 
 // ──────────────────────────────────────────────────────────
+// 除息日程表（全部有個股期貨的標的，無篩選）
+// ──────────────────────────────────────────────────────────
+function renderCalendar() {
+  const all = DATA.map(calcRow).sort((a, b) => new Date(a.exDate) - new Date(b.exDate));
+
+  const byMonth = {};
+  all.forEach(r => {
+    const m = r.exDate.slice(0, 7);
+    if (!byMonth[m]) byMonth[m] = [];
+    byMonth[m].push(r);
+  });
+
+  const upcomingCount = all.filter(r => r.daysToEx >= 0).length;
+  const passedCount = all.filter(r => r.daysToEx < 0).length;
+
+  const monthHtml = Object.entries(byMonth).map(([m, rows]) => {
+    const [year, mon] = m.split('-');
+    const upcomingInMonth = rows.filter(r => r.daysToEx >= 0).length;
+    const rowsHtml = rows.map(r => {
+      const passed = r.daysToEx < 0;
+      const urgent = !passed && r.daysToEx <= 3;
+      const soon = !passed && r.daysToEx <= 7;
+      const exColor = passed ? '#9B9B9B' : urgent ? '#B91C1C' : soon ? '#B45309' : '#1A1A1A';
+      const rowBg = passed ? '#FAFAF7' : urgent ? '#FEF2F2' : '#FFF';
+      const daysTag = passed
+        ? `<span style="font-size:10px;color:#9B9B9B;">已除息</span>`
+        : `<span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:${exColor};">T−${r.daysToEx}</span>`;
+      const estTag = r.estimated
+        ? `<span style="font-size:9px;padding:1px 4px;background:#E0DDD4;border-radius:2px;margin-left:4px;font-family:'JetBrains Mono',monospace;">估</span>`
+        : '';
+      return `
+        <div style="display:grid;grid-template-columns:90px 1fr 110px 72px 110px 72px 90px 44px;gap:0;padding:10px 12px;background:${rowBg};border:1px solid #E0DDD4;border-top:none;align-items:center;opacity:${passed?0.62:1};">
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:${exColor};">${r.exDate.slice(5).replace('-','/')}</div>
+            <div style="margin-top:2px;">${daysTag}</div>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;">${r.ticker}</span>
+            <span style="font-family:'Noto Serif TC',serif;font-size:14px;">${r.name}</span>
+            ${estTag}
+          </div>
+          <div style="font-size:11px;color:#6B6B6B;">${r.sector}</div>
+          <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;">${r.spotPrice.toFixed(2)}</div>
+          <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;">
+            <span style="color:#B45309;font-weight:600;">${r.cashDividend.toFixed(2)}</span>
+            <span style="font-size:11px;color:#6B6B6B;"> / ${r.yieldPct}%</span>
+          </div>
+          <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:#6B6B6B;">${r.futuresVolume.toLocaleString()}</div>
+          <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;">${fmt(r.margin.initial)}</div>
+          <div style="text-align:center;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 5px;background:#F5F4EF;border:1px solid #E0DDD4;color:#6B6B6B;">${r.marginTier}</span>
+          </div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div style="margin-bottom:28px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+          <div style="font-family:'Noto Serif TC',serif;font-size:15px;font-weight:700;">${year} 年 ${parseInt(mon)} 月</div>
+          <div style="flex:1;height:1px;background:#E0DDD4;"></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6B6B6B;">${rows.length} 檔${upcomingInMonth > 0 ? ` · ${upcomingInMonth} 即將除息` : ' · 全數已除息'}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:90px 1fr 110px 72px 110px 72px 90px 44px;gap:0;padding:7px 12px;background:#F5F4EF;border:1px solid #E0DDD4;font-family:'JetBrains Mono',monospace;font-size:10px;color:#6B6B6B;text-transform:uppercase;letter-spacing:0.08em;">
+          <div>除息日</div><div>代號 / 名稱</div><div>產業</div>
+          <div style="text-align:right;">現股</div>
+          <div style="text-align:right;">股利 / 殖利率</div>
+          <div style="text-align:right;">期貨量</div>
+          <div style="text-align:right;">保證金/口</div>
+          <div style="text-align:center;">級</div>
+        </div>
+        ${rowsHtml}
+      </div>`;
+  }).join('');
+
+  document.getElementById("tab-calendar").innerHTML = `
+    <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;padding:14px 18px;background:#FFF;border:1px solid #E0DDD4;flex-wrap:wrap;">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#6B6B6B;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">涵蓋標的</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;">${all.length} 檔</div>
+      </div>
+      <div style="width:1px;height:40px;background:#E0DDD4;"></div>
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#6B6B6B;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">即將除息</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#B45309;">${upcomingCount} 檔</div>
+      </div>
+      <div style="width:1px;height:40px;background:#E0DDD4;"></div>
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#6B6B6B;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">已除息</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#9B9B9B;">${passedCount} 檔</div>
+      </div>
+      <div style="flex:1;"></div>
+      <div style="font-size:11px;color:#9B9B9B;">全部有個股期貨的標的 · 不含篩選規則 · 依除息日排序</div>
+    </div>
+    ${monthHtml}
+  `;
+}
+
+// ──────────────────────────────────────────────────────────
 // Main render
 // ──────────────────────────────────────────────────────────
 function render() {
@@ -1705,6 +1808,7 @@ function render() {
   renderRows(rows);
   if (state.tab === "backtest") renderBacktest();
   if (state.tab === "notif") renderNotifSettings();
+  if (state.tab === "calendar") renderCalendar();
   renderTabBadge();
 }
 
@@ -1716,7 +1820,7 @@ function setupEvents() {
     document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
     t.classList.add("active");
     state.tab = t.dataset.tab;
-    ["scan", "notif", "backtest", "method"].forEach(name => {
+    ["scan", "notif", "backtest", "method", "calendar"].forEach(name => {
       document.getElementById("tab-" + name).style.display = state.tab === name ? "block" : "none";
     });
     render();
