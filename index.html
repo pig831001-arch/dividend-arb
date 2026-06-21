@@ -1937,9 +1937,8 @@ async function fetchLivePrices() {
       DATA = DATA.map(s => {
         if (!priceMap[s.ticker]) return s;
         const newSpot = priceMap[s.ticker];
-        // 維持原本的基差比例（若有舊資料），避免只改現股造成假基差
-        const basisRatio = s.spotPrice > 0 ? s.futuresPrice / s.spotPrice : 0.995;
-        const newFutures = +(newSpot * basisRatio).toFixed(2);
+        // 用即時股價重算期貨估算價 (spotPrice × 0.995)，確保基差顯示正確
+        const newFutures = +(newSpot * 0.995).toFixed(2);
         return { ...s, spotPrice: newSpot, futuresPrice: newFutures };
       });
       const now = new Date();
