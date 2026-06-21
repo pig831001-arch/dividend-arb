@@ -1900,6 +1900,8 @@ function showApp() {
   document.getElementById("userEmail").textContent = USER_EMAIL;
   setupEvents();
   loadRemoteData();   // 抓後端最新資料庫
+  fetchLivePrices();  // 抓即時股價
+  setInterval(fetchLivePrices, 3 * 60 * 1000); // 每 3 分鐘更新股價
   render();
 }
 
@@ -1946,6 +1948,47 @@ async function loadRemoteData() {
   } catch (e) {
     console.warn("資料同步失敗:", e);
     if (statusEl) statusEl.innerHTML = `<span class="neg">同步失敗</span>`;
+  }
+}
+
+// ──────────────────────────────────────────────────────────
+// 即時股價抓取 — TWSE MIS API (支援 CORS，盤中即時／盤後前收)
+// 上市用 tse_XXXX.tw，上櫃用 otc_XXXX.tw
+// ──────────────────────────────────────────────────────────
+async function fetchLivePrices() {
+  // 上櫃 (TPEx) 標的
+  const OTC_TICKERS = new Set(["5347"]);
+  const exCh = DATA.map(s => `${OTC_TICKERS.has(s.ticker) ? "otc" : "tse"}_${s.ticker}.tw`).join("|");
+
+  try {
+    const url = `https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=${encodeURIComponent(exCh)}&_=${Date.now()}`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const json = await r.json();
+    const msgArray = json.msgArray || [];
+
+    const priceMap = {};
+    msgArray.forEach(item => {
+      // z = 當前價；若為 "-" 則用 y (前收)
+      const raw = (item.z && item.z !== "-") ? item.z : item.y;
+      const price = parseFloat(raw);
+      if (item.c && !isNaN(price) && price > 0) priceMap[item.c] = price;
+    });
+
+    if (Object.keys(priceMap).length > 0) {
+      DATA = DATA.map(s => priceMap[s.ticker] ? { ...s, spotPrice: priceMap[s.ticker] } : s);
+      const now = new Date();
+      const t = `${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")}`;
+      const statusEl = document.getElementById("dataStatus");
+      if (statusEl) {
+        const n = Object.keys(priceMap).length;
+        statusEl.innerHTML = `<span class="mono">即時股價 ${n}/${DATA.length} 檔 · ${t} (TWSE)</span>`;
+      }
+      render();
+    }
+  } catch (e) {
+    console.warn("即時股價 TWSE 抓取失敗:", e.message);
+    // 失敗時靜默保留現有價格，不影響頁面
   }
 }
 
