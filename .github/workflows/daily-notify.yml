@@ -1,0 +1,48 @@
+name: 每日除息通知 (09:00 台北時間)
+
+on:
+  schedule:
+    # GitHub Actions 用 UTC 時間，台北時間 09:00 = UTC 01:00
+    - cron: '0 1 * * 1-5'   # 週一到週五 09:00 台北
+  workflow_dispatch:          # 也允許手動觸發測試
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: 安裝套件
+        run: |
+          pip install requests pandas beautifulsoup4 lxml openpyxl sendgrid
+
+      - name: 跑通知排程
+        env:
+          # 在 GitHub Repo 的 Settings → Secrets and variables → Actions 設定:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+          # 訂閱者清單 (JSON 字串)
+          SUBSCRIBERS_JSON: ${{ secrets.SUBSCRIBERS_JSON }}
+          # SMTP 備援 (選填，Gmail 等)
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+        run: python notify.py
+
+      - name: 上傳 log (失敗時)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: notify-log
+          path: |
+            *.log
+            *.csv
